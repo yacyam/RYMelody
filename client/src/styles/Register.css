@@ -1,0 +1,52 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display&display=swap');
+
+
+.register--container {
+  background-color: darkblue;
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+}
+
+.register--form {
+  background-color: rgb(18, 18, 205);
+  border-radius: 10px;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  padding: 30px;
+  width: 500px;
+  height: 500px;
+}
+
+.register--form input {
+  height: 30px;
+  border: none;
+  padding: 10px;
+  font-size: large;
+  border-radius: 10px;
+  font-family: 'Playfair Display', serif;
+}
+
+.register--legend {
+  font-family: 'Playfair Display', serif;
+  align-self: center;
+  font-size: 40px;
+}
+
+.register--btn {
+  font-family: 'Playfair Display', serif;
+  background-color: gray;
+  border: none;
+  height: 50px;
+  font-size: 20px;
+  color: white;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.register--btn:hover {
+  background-color: rgb(141, 141, 141);
+}

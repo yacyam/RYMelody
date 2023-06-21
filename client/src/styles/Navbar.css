@@ -1,0 +1,29 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display&display=swap');
+
+.navbar--container {
+  font-family: 'Playfair Display', serif;
+  display: flex;
+  padding-left: 15px;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #412518;
+  color: white;
+}
+
+.navbar--container h1 {
+  font-size: 25px;
+}
+
+.navbar--links {
+  display: flex;
+  font-size: 20px;
+  align-items: center;
+  justify-content: space-evenly;
+}
+
+.navbar--links a {
+  text-decoration: none;
+  background-color: rgb(133, 95, 24);
+  color: white;
+  padding: 25px;
+}
