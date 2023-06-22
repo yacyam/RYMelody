@@ -3,6 +3,7 @@
 .navbar--container {
   font-family: 'Playfair Display', serif;
   display: flex;
+  height: 50px;
   padding-left: 15px;
   justify-content: space-between;
   align-items: center;
@@ -10,20 +11,21 @@
   color: white;
 }
 
-.navbar--container h1 {
+.navbar--container a {
   font-size: 25px;
+  color: white;
+  text-decoration: none;
 }
 
 .navbar--links {
   display: flex;
-  font-size: 20px;
   align-items: center;
   justify-content: space-evenly;
 }
 
 .navbar--links a {
+  font-size: 20px;
   text-decoration: none;
   background-color: rgb(133, 95, 24);
   color: white;
-  padding: 25px;
 }

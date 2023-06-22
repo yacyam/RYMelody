@@ -3,18 +3,19 @@ import express from 'express'
 import session from 'express-session'
 import passport from 'passport'
 import cors from 'cors'
+import { pool } from './database/index'
 require('dotenv').config()
 
-const getFunc = require('connect-pg-simple')
-const PostgresqlStore = getFunc(session)
-
-const sessionStore = new PostgresqlStore({
-  conString: `postgresql://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_DATABASE}`,
-});
+const pgSession = require('connect-pg-simple')(session)
 
 const app = express()
 
-app.use(cors())
+app.use(cors({
+  origin: 'http://localhost:5173',
+  credentials: true
+}))
+
+require('./strategy/local')
 
 app.use(express.json())
 app.use(express.urlencoded())
@@ -23,15 +24,18 @@ app.use(session({
   secret: process.env.SESSION_SECRET || '',
   resave: false,
   saveUninitialized: false,
-  store: sessionStore,
+  store: new pgSession({
+    pool: pool
+  }),
   cookie: {
-    sameSite: true,
-    secure: false,
-    maxAge: 1000 * 60 * 60 * 24 * 7
+    secure: false
   }
 }))
 
 import authRoutes from './routes/auth'
+
+app.use(passport.initialize())
+app.use(passport.session())
 
 app.use('/auth', authRoutes)
 
