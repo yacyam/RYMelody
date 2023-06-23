@@ -17,8 +17,8 @@ app.use(cors({
 
 require('./strategy/local')
 
-app.use(express.json())
-app.use(express.urlencoded())
+app.use(express.json({ limit: '2mb' }))
+app.use(express.urlencoded({ limit: '2mb' }))
 
 app.use(session({
   secret: process.env.SESSION_SECRET || '',
@@ -33,11 +33,13 @@ app.use(session({
 }))
 
 import authRoutes from './routes/auth'
+import postRoutes from './routes/post'
 
 app.use(passport.initialize())
 app.use(passport.session())
 
 app.use('/auth', authRoutes)
+app.use('/post', postRoutes)
 
 app.listen(PORT, () => console.log(`Server Listening on PORT ${PORT}`))
 

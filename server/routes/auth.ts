@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { hashPassword } from "../utils/hash";
 import * as User from "../controllers/user"
-import { authorizeRegisterForm } from "../utils/auth";
+import { authorizeRegisterForm } from "../utils/formAuth"
 import passport from "passport";
 const router = Router()
 

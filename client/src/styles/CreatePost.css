@@ -1,0 +1,17 @@
+.createpost--container {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.createpost--form {
+  display: flex;
+  flex-direction: column;
+  width: 500px;
+  height: 500px;
+}
+
+.createpost--form textarea {
+  height: 200px;
+}

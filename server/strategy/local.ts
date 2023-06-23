@@ -19,7 +19,6 @@ passport.deserializeUser(async (id: number, done) => {
     if (!user) {
       throw new Error('User Does Not Exist')
     }
-    console.log(user)
     done(null, user)
   } catch (err) {
     done(err)

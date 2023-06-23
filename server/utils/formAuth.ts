@@ -8,7 +8,7 @@ async function authorizeRegisterForm(
   confirmPassword: string
 ): Promise<{ message: string }[]> {
 
-  let errors: { message: string }[] = []
+  const errors: { message: string }[] = []
 
   if (!username || !email || !password || !confirmPassword) {
     return [{ message: 'All Fields Must Be Filled In' }]
@@ -40,6 +40,42 @@ async function authorizeRegisterForm(
   return errors
 }
 
+function authorizePostForm(
+  title: string,
+  desc: string,
+  audio: string,
+  audioSize: number,
+  username?: string
+): { message: string }[] {
+
+  const errors: { message: string }[] = []
+  if (!username) {
+    return [{ message: 'Must Be Signed In To Create Post' }]
+  }
+
+  if (!title || !desc || !audio || !audioSize) {
+    console.log(audioSize)
+    return [{ message: 'All Fields Must Be Filled In' }]
+  }
+
+  if (title.length < 5 || title.length > 60) {
+    errors.push({ message: 'Title Must Be 5 - 60 Characters Long ' })
+  }
+
+  if (desc.length < 5 || desc.length > 800) {
+    errors.push({ message: 'Description Must be 5 - 800 Characters Long' })
+  }
+
+  if (audioSize > 1048576) {
+    errors.push({ message: 'File Size Too Large, Please Keep Below 1MB' })
+  }
+
+  return errors
+}
+
+
+
 export {
-  authorizeRegisterForm
+  authorizeRegisterForm,
+  authorizePostForm
 }
