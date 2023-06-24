@@ -6,7 +6,9 @@ export default function PostComment(props: Comment) {
   return (
     <div className="comment--container">
       <p className="comment--username">{props.username}</p>
-      <h4>{props.comment}</h4>
+      <div className="comment--main">
+        <h4 className="comment--main-text">{props.comment}</h4>
+      </div>
     </div>
   )
 }

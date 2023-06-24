@@ -8,3 +8,11 @@
 .comment--username {
   color: rgb(152, 165, 252);
 }
+
+.comment--main {
+  border-left: 1px solid rgb(152, 165, 252);
+}
+
+.comment--main-text {
+  margin-left: 10px;
+}

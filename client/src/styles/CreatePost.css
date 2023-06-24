@@ -1,17 +1,73 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans&family=Playfair+Display&display=swap');
+
 .createpost--container {
+  font-family: 'Open Sans', sans-serif;
   height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-direction: column;
+  gap: 40px;
+  font-size: 22px;
+}
+
+.createpost--container * {
+  font-family: 'Open Sans', sans-serif;
+}
+
+.createpost--title {
+  color: white;
+  border-bottom: 2px solid white;
+
 }
 
 .createpost--form {
   display: flex;
   flex-direction: column;
-  width: 500px;
-  height: 500px;
+  gap: 30px;
+  width: 800px;
+  height: 300px;
 }
 
+.createpost--form input {
+  font-size: 16px;
+  background-color: transparent;
+  border: none;
+  border-bottom: 1px solid white;
+  color: white;
+  padding: 2px;
+}
+
+
+
 .createpost--form textarea {
+  display: flex;
+  font-size: 14px;
+  background-color: transparent;
   height: 200px;
+  border: none;
+  border-bottom: 1px solid white;
+  color: white;
+  resize: none;
+  padding: 2px;
+}
+
+.createpost--form-file input[type=file]::file-selector-button {
+  border: none;
+  padding: 2px 4px;
+  background-color: #a29bfe;
+  transition: 0.1s ease-in;
+}
+
+.createpost--form-file input[type=file]::file-selector-button:hover {
+  background-color: #928aff;
+}
+
+.createpost--form button {
+  border: none;
+  background-color: #a29bfe;
+}
+
+.createpost--form button:hover {
+  background-color: #928aff;
 }

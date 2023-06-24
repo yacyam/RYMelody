@@ -115,9 +115,10 @@ export default function Post() {
             <button>Post Comment</button>
           </form>
       }
-
-      {commentElement}
-
+      <div className="post--all-comments">
+        <h2 className="post--all-comments-title">Comments</h2>
+        {commentElement}
+      </div>
     </div>
   )
 }

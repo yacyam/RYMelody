@@ -91,6 +91,7 @@ export default function CreatePost() {
 
   return (
     <div className="createpost--container">
+      <h1 className='createpost--title'>Create Post</h1>
       <form onSubmit={submitForm} className='createpost--form'>
         <input
           type="text"
@@ -115,7 +116,6 @@ export default function CreatePost() {
             accept='audio/*'
           />
           {errors && <h3>There was an error uploading this file, please try again</h3>}
-          {false && <audio controls src={formData.audio} />}
         </div>
 
         <ul>

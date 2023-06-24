@@ -85,3 +85,8 @@
 .post--notlogged-comment {
   margin-bottom: 40px;
 }
+
+.post--all-comments-title {
+  text-decoration: underline;
+  margin-bottom: 10px;
+}

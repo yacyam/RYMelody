@@ -19,8 +19,9 @@
 
 .navbar--links {
   display: flex;
+  font-size: 20px;
   align-items: center;
-  justify-content: space-evenly;
+  gap: 20px;
 }
 
 .navbar--links img {
@@ -32,6 +33,6 @@
 .navbar--links a {
   font-size: 20px;
   text-decoration: none;
-  background-color: rgb(133, 95, 24);
+  background-color: #190061;
   color: white;
 }
