@@ -50,11 +50,11 @@ function authorizePostForm(
   desc: string,
   audio: string,
   audioSize: number,
-  username?: string
+  userId?: number
 ): { message: string }[] {
 
   const errors: { message: string }[] = []
-  if (!username) {
+  if (userId === 0) {
     return [{ message: 'Must Be Signed In To Create Post' }]
   }
 

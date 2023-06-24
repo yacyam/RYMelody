@@ -87,6 +87,6 @@
 }
 
 .post--all-comments-title {
-  text-decoration: underline;
+  border-bottom: 1px solid white;
   margin-bottom: 10px;
 }

@@ -1,30 +1,32 @@
 import { createContext, useEffect, useState } from "react"
-import axios from "axios"
 
-const AuthContext = createContext({ isLoggedIn: false })
+const AuthContext = createContext({ isLoggedIn: false, userData: {} })
 
 export default AuthContext
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [userData, setUserData] = useState({})
 
   useEffect(() => {
-    axios.get('http://localhost:3000/auth/authenticate', {
-      withCredentials: true
+    fetch('http://localhost:3000/auth/authenticate', {
+      method: 'GET',
+      'credentials': 'include'
     })
-      .then(res => {
-        if (res.status === 200) {
-          setIsLoggedIn(true)
-        }
-        else {
-          setIsLoggedIn(false)
-        }
+      .then(res => res.json())
+      .then(data => {
+        setIsLoggedIn(true)
+        setUserData(data)
+      })
+      .catch(() => {
+        console.log('not logged in')
+        setIsLoggedIn(false)
       })
   }, [])
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn }}>
+    <AuthContext.Provider value={{ isLoggedIn, userData }}>
       {children}
     </AuthContext.Provider>
   )

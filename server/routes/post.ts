@@ -5,18 +5,18 @@ import * as Post from "../controllers/post"
 const router = Router()
 
 router.post('/create', async (req, res) => {
-  let username = ""
+  let userId: number = 0
   if ('user' in req) {
-    username = (req.user as User).username
+    userId = (req.user as User).id
   }
   const { title, desc, audio, audioSize } = req.body
 
-  const errors = authorizePostForm(title, desc, audio, audioSize, username)
+  const errors = authorizePostForm(title, desc, audio, audioSize, userId)
   if (errors.length > 0) {
     res.status(400).send(errors)
   }
   else {
-    await Post.createPost(username, title, desc, audio)
+    await Post.createPost(userId, title, desc, audio)
   }
 })
 
@@ -51,7 +51,7 @@ router.post('/comment', async (req, res) => {
   if (!('user' in req)) {
     return res.status(401).send([{ message: 'Must Be Logged In To Comment' }])
   }
-  const username = (req.user as User).username
+  const userId = (req.user as User).id
   const { postId, comment } = req.body
   const errors = await authorizeCommentForm(postId, comment)
   if (errors.length > 0) {
@@ -59,7 +59,7 @@ router.post('/comment', async (req, res) => {
   }
   else {
     try {
-      await Post.createComment(postId, username, comment)
+      await Post.createComment(postId, userId, comment)
       res.sendStatus(200)
     } catch (err) {
       res.sendStatus(500)

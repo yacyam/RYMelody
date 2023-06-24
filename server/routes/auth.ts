@@ -37,7 +37,7 @@ router.post('/register', async (req, res) => {
 
 router.get('/authenticate', (req, res) => {
   if (req.user) {
-    res.sendStatus(200)
+    res.status(200).send(req.user)
   }
   else {
     res.sendStatus(401)

@@ -4,21 +4,21 @@ import { HomePost, Post, Comment } from "../database/Post"
 import { QueryResult } from "pg"
 
 async function createPost(
-  username: string,
+  userId: number,
   title: string,
   desc: string,
   audio: string
 ): Promise<void> {
 
-  await pool.query(Query.createPost, [username, title, desc, audio])
+  await pool.query(Query.createPost, [userId, title, desc, audio])
 }
 
 async function createComment(
   postId: string,
-  username: string,
+  userId: number,
   comment: string
 ): Promise<void> {
-  await pool.query(Query.createComment, [postId, username, comment])
+  await pool.query(Query.createComment, [postId, userId, comment])
 }
 
 async function getPosts(amount: string): Promise<HomePost[]> {

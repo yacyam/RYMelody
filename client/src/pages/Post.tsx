@@ -7,13 +7,15 @@ import PostComment from "../components/PostComment"
 
 export default function Post() {
   const { id } = useParams()
-  const { isLoggedIn } = useContext(AuthContext)
+  const { isLoggedIn, userData } = useContext(AuthContext)
   const [postData, setPostData] = useState<FullPost | undefined>(undefined)
   const [formData, setFormData] = useState({
     postId: id,
     comment: ""
   })
   const [errors, setErrors] = useState<{ message: string }[]>([])
+
+  console.log(userData)
 
   useEffect(() => {
     fetch(`http://localhost:3000/post/${id}`)
