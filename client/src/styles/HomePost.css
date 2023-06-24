@@ -1,0 +1,45 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans&family=Playfair+Display&display=swap');
+
+.homepost--container {
+  font-family: 'Open Sans', sans-serif;
+  border: 0.1px dotted rgb(221, 255, 0);
+  height: 120px;
+  width: 400px;
+  padding: 15px;
+  display: grid;
+  grid-template-rows: 2fr 2fr;
+  background-color: #3500d3;
+  color: white;
+  box-shadow: 4px 4px 0px 0px #797979;
+  transition: box-shadow ease-in 0.1s;
+  cursor: pointer;
+}
+
+.homepost--container:hover {
+  border: 0.5px solid rgb(255, 255, 255);
+  box-shadow: 8px 8px 0px 0px #FFFFFF;
+}
+
+.homepost--top-portion {
+  font-size: 22px;
+  padding: 5px;
+  border-bottom: 0.5px solid gray;
+}
+
+.homepost--top-portion p {
+  font-size: 14px;
+  color: rgb(152, 165, 252);
+}
+
+.homepost--desc {
+  align-self: center;
+  width: 400px;
+  font-size: 18px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.homepost--desc-text {
+  font-weight: 300;
+}

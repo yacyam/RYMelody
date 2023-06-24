@@ -1,0 +1,10 @@
+.comment--container {
+  height: 70px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.comment--username {
+  color: rgb(152, 165, 252);
+}

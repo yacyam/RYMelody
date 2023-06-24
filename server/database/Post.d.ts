@@ -12,3 +12,9 @@ export interface HomePost {
   title: string,
   description: string
 }
+
+export interface Comment {
+  id: number,
+  username: string,
+  comment: string
+}

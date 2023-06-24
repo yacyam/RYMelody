@@ -1,13 +1,13 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans&family=Playfair+Display&display=swap');
 
 .navbar--container {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Open Sans', sans-serif;
   display: flex;
   height: 50px;
   padding: 0px 15px;
   justify-content: space-between;
   align-items: center;
-  background-color: #412518;
+  background-color: #190061;
   color: white;
 }
 

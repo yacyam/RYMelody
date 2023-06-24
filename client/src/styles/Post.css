@@ -1,0 +1,87 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans&family=Playfair+Display&display=swap');
+
+.post--container {
+  font-family: 'Open Sans', sans-serif;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+
+  height: 100%;
+  border-left: 400px solid #282828;
+  border-right: 400px solid #282828;
+  color: rgb(255, 255, 255);
+}
+
+.post--main-container {
+  min-height: 140px;
+  padding-bottom: 50px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  border-bottom: 1px solid gray;
+  margin-bottom: 40px;
+
+}
+
+.post--main-top-portion {
+  align-items: bottom;
+  font-size: 28px;
+}
+
+.post--main-top-portion p {
+  font-size: 15px;
+  color: rgb(152, 165, 252);
+}
+
+.post--main-desc {
+  align-self: center;
+}
+
+.post--audio {
+  filter: sepia(100%) saturate(400%) grayscale(0) contrast(200%) hue-rotate(358deg) invert(99.4444%);
+  width: 400px;
+  height: 30px;
+}
+
+
+.post--comment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 40px;
+}
+
+.post--comment-form button {
+  font-family: 'Open Sans', sans-serif;
+  color: white;
+  width: 120px;
+  height: 30px;
+  background-color: #3500d3;
+  outline: none;
+  border: none;
+  cursor: pointer;
+}
+
+.post--comment-form button:hover {
+  background-color: #5226d6;
+}
+
+::placeholder {
+  color: white;
+  opacity: 50%;
+}
+
+.post--comment-box {
+  padding: 5px;
+  font-family: 'Open Sans', sans-serif;
+  text-align: top;
+  height: 100px;
+  background: rgb(121, 121, 121);
+  border-bottom: 1px solid rgb(0, 0, 0);
+  color: white;
+  resize: none;
+}
+
+.post--notlogged-comment {
+  margin-bottom: 40px;
+}

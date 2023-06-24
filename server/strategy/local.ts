@@ -45,7 +45,7 @@ passport.use(new LocalStrategy({
       return done(null, user)
 
     } catch (err) {
-      return done(err)
+      done(err)
     }
   }
 ));

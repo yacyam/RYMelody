@@ -1,4 +1,5 @@
 import * as User from "../controllers/user"
+import * as Post from "../controllers/post"
 const emailCheck = /^(?=.{1,254}$)(?=.{1,64}@)[-!#$%&'*+/0-9=?A-Z^_`a-z{|}~]+(\.[-!#$%&'*+/0-9=?A-Z^_`a-z{|}~]+)*@[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?(\.[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*$/
 
 async function authorizeRegisterForm(
@@ -23,6 +24,10 @@ async function authorizeRegisterForm(
 
   if (usernameExists) {
     errors.push({ message: 'Username Already Exists' })
+  }
+
+  if (username.length < 1 || username.length > 30) {
+    errors.push({ message: 'Username Must Be 1 - 30 Characters' })
   }
 
   if (!emailCheck.test(email)) {
@@ -73,9 +78,27 @@ function authorizePostForm(
   return errors
 }
 
+async function authorizeCommentForm(
+  postId: string,
+  comment: string
+): Promise<{ message: string }[]> {
+  const errors: { message: string }[] = []
+
+  const post = await Post.findById(postId)
+  if (!post) {
+    errors.push({ message: 'This Post Does Not Exist' })
+  }
+  if (comment.length < 4 || comment.length > 400) {
+    errors.push({ message: 'Comment Must be 4 - 400 Characters Long' })
+  }
+
+  return errors
+}
+
 
 
 export {
   authorizeRegisterForm,
-  authorizePostForm
+  authorizePostForm,
+  authorizeCommentForm
 }

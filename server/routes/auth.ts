@@ -7,11 +7,11 @@ const router = Router()
 
 router.get('/login_failure', (req, res) => {
   console.log('failed')
-  res.sendStatus(403)
+  res.sendStatus(400)
 })
 
 router.post('/login',
-  passport.authenticate('local', { session: true, failureRedirect: '/auth/login_failure' }),
+  passport.authenticate('local', { failureRedirect: '/auth/login_failure' }),
   (req, res) => {
     res.sendStatus(200)
   })

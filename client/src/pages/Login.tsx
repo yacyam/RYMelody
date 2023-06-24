@@ -10,6 +10,8 @@ export default function Login() {
 
   const [formError, setFormError] = useState(false)
 
+  const [errors, setErrors] = useState<{ message: string }[]>([])
+
   function updateForm(e: React.SyntheticEvent): void {
     const { name, value } = e.target as HTMLInputElement
 
@@ -37,10 +39,17 @@ export default function Login() {
       headers: { 'Content-Type': 'application/json' }
     })
 
-    if (res.ok) {
+    if (!res.ok) {
+      setErrors([{ message: 'Username Or Password Incorrect, Please Try Again' }])
+    }
+    else {
       window.open('http://localhost:5173/', '_self')
     }
   }
+
+  const displayErrors = errors.map((err, i) => {
+    return <li key={i}>{err.message}</li>
+  })
 
 
   return (
@@ -68,6 +77,7 @@ export default function Login() {
           <h3 className="login--enter-both">
             Please Enter Both Username and Password</h3>
         }
+        {displayErrors}
         <button className='register--btn'>Log In</button>
 
       </form>
