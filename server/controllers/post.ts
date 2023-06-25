@@ -19,6 +19,8 @@ async function createComment(
   comment: string
 ): Promise<void> {
   await pool.query(Query.createComment, [postId, userId, comment])
+  const newId = await pool.query(Query.getCommentId, [postId, userId])
+  return newId.rows[0]
 }
 
 async function getPosts(amount: string): Promise<HomePost[]> {
@@ -26,9 +28,14 @@ async function getPosts(amount: string): Promise<HomePost[]> {
   return firstPosts.rows
 }
 
-async function getAllLikes(postId: string): Promise<{ count: number }> {
+async function getAllLikes(postId: string): Promise<number> {
   const allLikes = await pool.query(Query.getAllLikes, [postId])
-  return allLikes.rows[0]
+  if (allLikes.length === 0) {
+    throw new Error('Query Error: Unable to obtain likes for post')
+  }
+  const allActualLikes = parseInt(allLikes.rows[0].count)
+
+  return allActualLikes
 }
 
 async function findById(id: string): Promise<Post | undefined> {

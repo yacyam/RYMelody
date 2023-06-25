@@ -1,13 +1,24 @@
 import { createContext, useEffect, useState } from "react"
 
-const AuthContext = createContext({ isLoggedIn: false, userData: {} })
+interface User {
+  id: number,
+  username: string,
+  email: string,
+  password: string
+}
+
+const AuthContext =
+  createContext<{ isLoggedIn: boolean, userData: User | undefined }>({
+    isLoggedIn: false,
+    userData: undefined
+  })
 
 export default AuthContext
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [userData, setUserData] = useState({})
+  const [userData, setUserData] = useState()
 
   useEffect(() => {
     fetch('http://localhost:3000/auth/authenticate', {

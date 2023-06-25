@@ -34,14 +34,29 @@ router.get('/all', async (req, res) => {
 })
 
 router.get('/:id', async (req, res) => {
-  const { id } = req.params
+  const postId = req.params.id
   try {
-    const post = await Post.findById(id)
+    const post = await Post.findById(postId)
     if (!post) {
       return res.sendStatus(404)
     }
-    const allComments = await Post.findCommentsById(id)
-    res.status(200).send({ ...post, comments: allComments })
+    const allComments = await Post.findCommentsById(postId)
+    const allLikes = await Post.getAllLikes(postId)
+    let isLikedByUser = false
+    let canModify = false
+    if ('user' in req) {
+      const userId = (req.user as User).id
+      isLikedByUser = await Post.userLikedPost(postId, userId)
+      canModify = post.userid === userId
+    }
+
+    res.status(200).send({
+      ...post,
+      comments: allComments,
+      amountLikes: allLikes,
+      isPostLiked: isLikedByUser,
+      canModify: canModify
+    })
   } catch (err) {
     res.sendStatus(500)
   }
@@ -59,8 +74,9 @@ router.post('/comment', async (req, res) => {
   }
   else {
     try {
-      await Post.createComment(postId, userId, comment)
-      res.sendStatus(200)
+      const generatedId = await Post.createComment(postId, userId, comment)
+      const username = (req.user as User).username
+      res.status(200).send({ id: generatedId, username: username })
     } catch (err) {
       res.sendStatus(500)
     }
@@ -82,30 +98,6 @@ router.post('/:id/like', async (req, res) => {
 
     await Post.likePost(postId, userId)
     res.status(200).send('liked')
-  } catch (err) {
-    res.sendStatus(500)
-  }
-})
-
-router.get('/:id/isLiked', async (req, res) => {
-  if (!('user' in req)) {
-    return res.sendStatus(401)
-  }
-  const postId = req.params.id
-  const userId = (req.user as User).id
-  try {
-    const isLiked = await Post.userLikedPost(postId, userId)
-    return res.status(200).send({ isLiked })
-  } catch (err) {
-    res.sendStatus(500)
-  }
-})
-
-router.get('/:id/allLikes', async (req, res) => {
-  const postId = req.params.id
-  try {
-    const allLikes = await Post.getAllLikes(postId)
-    res.status(200).send(allLikes)
   } catch (err) {
     res.sendStatus(500)
   }

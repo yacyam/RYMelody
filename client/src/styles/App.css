@@ -3,4 +3,5 @@
   display: flex;
   flex-direction: column;
   background-color: #0c0032;
+  overflow: auto;
 }

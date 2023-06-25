@@ -12,6 +12,13 @@ export interface HighlightPost {
 }
 
 export interface FullPost extends HighlightPost {
-  audio: string
+  userid: number,
+  audio: string,
   comments: Comment[]
+}
+
+export interface FullPostData extends FullPost {
+  isPostLiked: boolean,
+  amountLikes: number,
+  canModify: boolean
 }

@@ -5,7 +5,7 @@
   display: flex;
   flex-direction: column;
   padding: 20px;
-
+  min-width: 500px;
   height: 100%;
   border-left: 400px solid #282828;
   border-right: 400px solid #282828;
@@ -40,7 +40,7 @@
 .post--audio {
   filter: sepia(100%) saturate(400%) grayscale(0) contrast(200%) hue-rotate(358deg) invert(99.4444%);
   width: 400px;
-  height: 30px;
+  height: 1.875rem;
 }
 
 
@@ -93,6 +93,12 @@
 
 .post--info {
   display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.post--likes {
+  font-size: 22px;
 }
 
 .button-like {

@@ -1,80 +1,74 @@
 import { useParams } from "react-router-dom"
 import "../styles/Post.css"
 import { useContext, useEffect, useState } from "react"
-import { FullPost } from "../interfaces/Post"
+import { FullPostData } from "../interfaces/Post"
 import AuthContext from "../context/AuthContext"
 import PostComment from "../components/PostComment"
 
 export default function Post() {
   const { id } = useParams()
-  const { isLoggedIn, userData } = useContext(AuthContext)
-  const [postData, setPostData] = useState<FullPost | undefined>(undefined)
+  const { isLoggedIn } = useContext(AuthContext)
   const [formData, setFormData] = useState({
     postId: id,
     comment: ""
   })
   const [errors, setErrors] = useState<{ message: string }[]>([])
-  const [isPostLiked, setIsPostLiked] = useState(false)
-  const [amountLikes, setAmountLikes] = useState(0)
-
-  /**
-   * Change so that postData, isPostLiked, and amountLikes are in 1 object
-   */
+  const [fullPostData, setFullPostData] = useState<FullPostData | undefined>(undefined)
 
   useEffect(() => {
-    fetch(`http://localhost:3000/post/${id}`)
-      .then(res => res.json())
-      .then(data => setPostData(data))
-  }, [])
-
-  useEffect(() => {
-    fetch(`http://localhost:3000/post/${id}/allLikes`)
-      .then(res => res.json())
-      .then(data => setAmountLikes(data.count))
-  })
-
-  useEffect(() => {
-    fetch(`http://localhost:3000/post/${id}/isLiked`, {
+    fetch(`http://localhost:3000/post/${id}`, {
       method: 'GET',
       'credentials': 'include'
     })
       .then(res => res.json())
-      .then(data => data.isLiked ? setIsPostLiked(true) : setIsPostLiked(false))
-      .catch(() => setIsPostLiked(false))
-  }, [isPostLiked])
+      .then(data => setFullPostData(data))
+  }, [])
 
   async function likeOrUnlikePost() {
+    if (!fullPostData) return
+
     const res = await fetch(`http://localhost:3000/post/${id}/like`, {
       method: 'POST',
       'credentials': 'include',
     })
 
     if (res.ok) {
-      setIsPostLiked(prevLiked => !prevLiked)
+      setFullPostData(oldPostData => {
+        if (!oldPostData) return oldPostData
+
+        const isLiked = !oldPostData.isPostLiked
+        const currLikes = oldPostData.amountLikes
+        const changedLikes = isLiked ? currLikes + 1 : currLikes - 1
+        return {
+          ...oldPostData,
+          isPostLiked: isLiked,
+          amountLikes: changedLikes
+        }
+      })
     }
   }
 
   function createPostLayout() {
-    if (!postData) return undefined
+    if (!fullPostData) return undefined
 
-    const postLikedStyle = isPostLiked ? "liked" : ""
+    const postLikedStyle = fullPostData.isPostLiked ? "liked" : ""
 
     return (
       <div className="post--main-container">
         <div className="post--main-top-portion">
-          <h3>{postData.title}</h3>
-          <p>{postData.username}</p>
+          <h3>{fullPostData.title}</h3>
+          <p>{fullPostData.username}</p>
         </div>
 
-        <p className="post--desc-text">{postData.description}</p>
-        <audio className="post--audio" controls src={postData.audio} />
+        <p className="post--desc-text">{fullPostData.description}</p>
+        <audio className="post--audio" controls src={fullPostData.audio} />
 
         <div className="post--info">
-          <p>{amountLikes}</p>
           <button className={`button button-like ${postLikedStyle}`} onClick={likeOrUnlikePost}>
             <i className="fa fa-heart"></i>
             <span>Like</span>
           </button>
+          <p className="post--likes">+{fullPostData.amountLikes}</p>
         </div>
 
       </div>
@@ -82,9 +76,9 @@ export default function Post() {
   }
 
   function createCommentLayout() {
-    if (!postData) return undefined
+    if (!fullPostData) return undefined
 
-    return postData.comments.map((comment) => {
+    return fullPostData.comments.map((comment) => {
       return <PostComment
         key={comment.id}
         {...comment}
@@ -122,7 +116,22 @@ export default function Post() {
       }
     }
     else {
-      location.reload()
+      const { id, username } = await res.json()
+
+      setFullPostData(oldPostData => {
+        if (!oldPostData) return oldPostData
+
+        const commentsCopy = [...oldPostData.comments]
+        commentsCopy.push({
+          id: id,
+          username: username,
+          comment: formData.comment
+        })
+        return {
+          ...oldPostData,
+          comments: commentsCopy
+        }
+      })
     }
   }
 
