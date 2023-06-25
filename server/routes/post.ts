@@ -67,4 +67,48 @@ router.post('/comment', async (req, res) => {
   }
 })
 
+router.post('/:id/like', async (req, res) => {
+  if (!('user' in req)) {
+    return res.status(401).send([{ message: 'Must Be Logged In To Like Post' }])
+  }
+  const postId = req.params.id
+  const userId = (req.user as User).id
+  try {
+    const isLiked = await Post.userLikedPost(postId, userId)
+    if (isLiked) {
+      await Post.unlikePost(postId, userId)
+      return res.status(200).send('unliked')
+    }
+
+    await Post.likePost(postId, userId)
+    res.status(200).send('liked')
+  } catch (err) {
+    res.sendStatus(500)
+  }
+})
+
+router.get('/:id/isLiked', async (req, res) => {
+  if (!('user' in req)) {
+    return res.sendStatus(401)
+  }
+  const postId = req.params.id
+  const userId = (req.user as User).id
+  try {
+    const isLiked = await Post.userLikedPost(postId, userId)
+    return res.status(200).send({ isLiked })
+  } catch (err) {
+    res.sendStatus(500)
+  }
+})
+
+router.get('/:id/allLikes', async (req, res) => {
+  const postId = req.params.id
+  try {
+    const allLikes = await Post.getAllLikes(postId)
+    res.status(200).send(allLikes)
+  } catch (err) {
+    res.sendStatus(500)
+  }
+})
+
 export default router

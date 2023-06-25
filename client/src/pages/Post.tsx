@@ -14,8 +14,12 @@ export default function Post() {
     comment: ""
   })
   const [errors, setErrors] = useState<{ message: string }[]>([])
+  const [isPostLiked, setIsPostLiked] = useState(false)
+  const [amountLikes, setAmountLikes] = useState(0)
 
-  console.log(userData)
+  /**
+   * Change so that postData, isPostLiked, and amountLikes are in 1 object
+   */
 
   useEffect(() => {
     fetch(`http://localhost:3000/post/${id}`)
@@ -23,8 +27,37 @@ export default function Post() {
       .then(data => setPostData(data))
   }, [])
 
+  useEffect(() => {
+    fetch(`http://localhost:3000/post/${id}/allLikes`)
+      .then(res => res.json())
+      .then(data => setAmountLikes(data.count))
+  })
+
+  useEffect(() => {
+    fetch(`http://localhost:3000/post/${id}/isLiked`, {
+      method: 'GET',
+      'credentials': 'include'
+    })
+      .then(res => res.json())
+      .then(data => data.isLiked ? setIsPostLiked(true) : setIsPostLiked(false))
+      .catch(() => setIsPostLiked(false))
+  }, [isPostLiked])
+
+  async function likeOrUnlikePost() {
+    const res = await fetch(`http://localhost:3000/post/${id}/like`, {
+      method: 'POST',
+      'credentials': 'include',
+    })
+
+    if (res.ok) {
+      setIsPostLiked(prevLiked => !prevLiked)
+    }
+  }
+
   function createPostLayout() {
     if (!postData) return undefined
+
+    const postLikedStyle = isPostLiked ? "liked" : ""
 
     return (
       <div className="post--main-container">
@@ -35,6 +68,15 @@ export default function Post() {
 
         <p className="post--desc-text">{postData.description}</p>
         <audio className="post--audio" controls src={postData.audio} />
+
+        <div className="post--info">
+          <p>{amountLikes}</p>
+          <button className={`button button-like ${postLikedStyle}`} onClick={likeOrUnlikePost}>
+            <i className="fa fa-heart"></i>
+            <span>Like</span>
+          </button>
+        </div>
+
       </div>
     )
   }
