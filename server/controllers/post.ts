@@ -67,6 +67,17 @@ async function unlikePost(postId: string, userId: number): Promise<void> {
   await pool.query(Query.removeLike, [postId, userId])
 }
 
+async function updateDescription(postId: string, text: string): Promise<void> {
+  await pool.query(Query.updateDescription, [text, postId])
+}
+
+//Might have to delete comment likes as well or replies if I add them
+async function deletePost(postId: string): Promise<void> {
+  await pool.query(Query.deletePost, [postId])
+  await pool.query(Query.deleteComments, [postId])
+  await pool.query(Query.deleteLikes, [postId])
+}
+
 export {
   getPosts,
   getAllLikes,
@@ -76,6 +87,8 @@ export {
   userLikedPost,
   createComment,
   likePost,
-  unlikePost
+  unlikePost,
+  updateDescription,
+  deletePost
 }
 

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import '../styles/Navbar.css'
+import '../styles/components/Navbar.css'
 import { useContext } from 'react'
 import AuthContext from '../context/AuthContext'
 import pfp from '../images/default.jpeg'

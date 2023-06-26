@@ -1,5 +1,5 @@
 import { HighlightPost } from "../interfaces/Post"
-import "../styles/HomePost.css"
+import "../styles/components/HomePost.css"
 
 export default function HomePost(props: HighlightPost) {
 

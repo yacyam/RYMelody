@@ -19,8 +19,12 @@ const createPost = "INSERT INTO posts (userId, title, description, audio) VALUES
 const createComment = "INSERT INTO comments (postId, userId, comment) VALUES ($1, $2, $3)"
 const createLike = "INSERT INTO postlikes (postId, userId) VALUES ($1, $2)"
 
+const updateDescription = "UPDATE posts SET description = $1 WHERE id = $2"
 
 const removeLike = "DELETE FROM postlikes WHERE postId = $1 AND userId = $2"
+const deletePost = "DELETE FROM posts WHERE id = $1"
+const deleteComments = "DELETE FROM comments WHERE postId = $1"
+const deleteLikes = "DELETE FROM postlikes WHERE postId = $1"
 
 
 export {
@@ -38,5 +42,9 @@ export {
   createPost,
   createComment,
   createLike,
-  removeLike
+  removeLike,
+  deletePost,
+  deleteComments,
+  deleteLikes,
+  updateDescription
 }

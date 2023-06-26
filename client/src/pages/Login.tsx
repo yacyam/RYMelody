@@ -1,6 +1,6 @@
 import { useState } from "react"
-import '../styles/Register.css'
-import '../styles/Login.css'
+import '../styles/pages/Register.css'
+import '../styles/pages/Login.css'
 
 export default function Login() {
   const [formData, setFormData] = useState({

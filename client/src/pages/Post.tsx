@@ -1,9 +1,10 @@
 import { useParams } from "react-router-dom"
-import "../styles/Post.css"
+import "../styles/pages/Post.css"
 import { useContext, useEffect, useState } from "react"
 import { FullPostData } from "../interfaces/Post"
 import AuthContext from "../context/AuthContext"
 import PostComment from "../components/PostComment"
+import { Edit } from "../components/Edit"
 
 export default function Post() {
   const { id } = useParams()
@@ -13,7 +14,16 @@ export default function Post() {
     comment: ""
   })
   const [errors, setErrors] = useState<{ message: string }[]>([])
+  const [editDescErrors, setEditDescErrors] = useState<{ message: string }[]>([])
   const [fullPostData, setFullPostData] = useState<FullPostData | undefined>(undefined)
+  const [isEditing, setIsEditing] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
+
+  /**
+   * Idea: instead of adding a canmodify to each comment, check the comments when
+   * mapping to see if the current user in the session is the owner of that comment,
+   * then add a canmodify afterwards when creating the postcomment component.
+   */
 
   useEffect(() => {
     fetch(`http://localhost:3000/post/${id}`, {
@@ -24,7 +34,7 @@ export default function Post() {
       .then(data => setFullPostData(data))
   }, [])
 
-  async function likeOrUnlikePost() {
+  async function likeOrUnlikePost(): Promise<void> {
     if (!fullPostData) return
 
     const res = await fetch(`http://localhost:3000/post/${id}/like`, {
@@ -48,6 +58,59 @@ export default function Post() {
     }
   }
 
+  async function updateDescription(data: { text: string }): Promise<void> {
+    const res = await fetch(`http://localhost:3000/post/${id}/update`, {
+      method: 'PUT',
+      'credentials': 'include',
+      body: JSON.stringify(data),
+      headers: {
+        'content-type': 'application/json'
+      }
+    })
+
+    if (!res.ok) {
+      if (res.status === 400) {
+        const errs = await res.json()
+        setEditDescErrors(errs)
+      }
+      else {
+        setEditDescErrors([{ message: 'Something Went Wrong, Please Try Again' }])
+      }
+    }
+    else {
+      setFullPostData(oldPostData => {
+        if (!oldPostData) return oldPostData
+
+        return {
+          ...oldPostData,
+          description: data.text
+        }
+      })
+      setIsEditing(false)
+    }
+  }
+
+  function setEditing(): void {
+    setIsEditing(prevEdit => !prevEdit)
+    setEditDescErrors([])
+  }
+
+  async function deletePost(): Promise<void> {
+    if (!confirmDelete) {
+      setConfirmDelete(true)
+      return
+    }
+
+    const res = await fetch(`http://localhost:3000/post/${id}`, {
+      method: 'DELETE',
+      'credentials': 'include'
+    })
+
+    if (res.ok) {
+      window.open('http://localhost:5173/', '_self')
+    }
+  }
+
   function createPostLayout() {
     if (!fullPostData) return undefined
 
@@ -60,7 +123,15 @@ export default function Post() {
           <p>{fullPostData.username}</p>
         </div>
 
-        <p className="post--desc-text">{fullPostData.description}</p>
+        {isEditing ? <>
+          <Edit text={fullPostData.description} updateFunc={updateDescription} />
+          <ul>
+            {editDescErrors.map((err, i) => <li key={i}>{err.message}</li>)}
+          </ul>
+        </> :
+          <p className="post--desc-text">{fullPostData.description}</p>
+        }
+
         <audio className="post--audio" controls src={fullPostData.audio} />
 
         <div className="post--info">
@@ -70,6 +141,13 @@ export default function Post() {
           </button>
           <p className="post--likes">+{fullPostData.amountLikes}</p>
         </div>
+
+        {fullPostData.canModify &&
+          <div className="post--edit">
+            <p onClick={setEditing}>{isEditing ? "Cancel" : "Edit"}</p>
+            <p onClick={deletePost}>{confirmDelete ? "Confirm?" : "Delete"}</p>
+          </div>
+        }
 
       </div>
     )

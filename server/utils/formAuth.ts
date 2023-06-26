@@ -50,7 +50,7 @@ function authorizePostForm(
   desc: string,
   audio: string,
   audioSize: number,
-  userId?: number
+  userId: number
 ): { message: string }[] {
 
   const errors: { message: string }[] = []
@@ -59,7 +59,6 @@ function authorizePostForm(
   }
 
   if (!title || !desc || !audio || !audioSize) {
-    console.log(audioSize)
     return [{ message: 'All Fields Must Be Filled In' }]
   }
 
@@ -95,10 +94,33 @@ async function authorizeCommentForm(
   return errors
 }
 
+async function authorizeUpdateForm(
+  userId: number,
+  postId: string,
+  text: string
+): Promise<{ message: string }[]> {
+  const errors: { message: string }[] = []
+
+  const fullPost = await Post.findById(postId)
+  if (!fullPost) {
+    return [{ message: 'Cannot Edit Post That Does Not Exist' }]
+  }
+  if (fullPost.userid !== userId) {
+    return [{ message: 'Must Be Original Poster to Edit Description' }]
+  }
+
+  if (text.length < 5 || text.length > 800) {
+    errors.push({ message: 'Description Must be 5 - 800 Characters Long' })
+  }
+
+  return errors
+}
+
 
 
 export {
   authorizeRegisterForm,
   authorizePostForm,
-  authorizeCommentForm
+  authorizeCommentForm,
+  authorizeUpdateForm
 }

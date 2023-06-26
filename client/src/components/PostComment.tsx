@@ -1,5 +1,5 @@
 import { Comment } from "../interfaces/Post";
-import "../styles/PostComment.css"
+import "../styles/components/PostComment.css"
 
 export default function PostComment(props: Comment) {
 

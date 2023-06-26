@@ -40,7 +40,8 @@
 .post--audio {
   filter: sepia(100%) saturate(400%) grayscale(0) contrast(200%) hue-rotate(358deg) invert(99.4444%);
   width: 400px;
-  height: 1.875rem;
+  min-height: 1.875rem;
+  max-height: 1.875rem;
 }
 
 
@@ -99,6 +100,16 @@
 
 .post--likes {
   font-size: 22px;
+}
+
+.post--edit {
+  display: flex;
+  gap: 10px;
+  color: #8a8a8a;
+}
+
+.post--edit p {
+  cursor: pointer;
 }
 
 .button-like {

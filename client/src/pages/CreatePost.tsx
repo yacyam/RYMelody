@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import '../styles/CreatePost.css'
+import '../styles/pages/CreatePost.css'
 export default function CreatePost() {
 
   const [formData, setFormData] = useState({
@@ -81,8 +81,9 @@ export default function CreatePost() {
       const errs = await res.json()
       setServerErrors(errs)
     }
-
-    console.log(formData)
+    else {
+      window.open('http://localhost:5173/', '_self')
+    }
   }
 
   const serverErrorElements = serverErrors.map((elem, i) => {

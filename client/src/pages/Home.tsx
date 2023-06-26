@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { HighlightPost } from '../interfaces/Post'
 import HomePost from '../components/HomePost'
-import '../styles/Home.css'
+import '../styles/pages/Home.css'
 
 export default function Home() {
   const [firstPosts, setFirstPosts] = useState<HighlightPost[]>([])
