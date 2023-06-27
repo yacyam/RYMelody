@@ -3,6 +3,7 @@
 .homepost--container {
   font-family: 'Open Sans', sans-serif;
   border: 0.1px dotted rgb(221, 255, 0);
+  margin: 20px;
   height: 120px;
   width: 400px;
   padding: 15px;

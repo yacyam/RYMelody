@@ -34,12 +34,14 @@ app.use(session({
 
 import authRoutes from './routes/auth'
 import postRoutes from './routes/post'
+import userRoutes from './routes/user'
 
 app.use(passport.initialize())
 app.use(passport.session())
 
 app.use('/auth', authRoutes)
 app.use('/post', postRoutes)
+app.use('/user', userRoutes)
 
 app.listen(PORT, () => console.log(`Server Listening on PORT ${PORT}`))
 

@@ -9,6 +9,7 @@ export interface Post {
 
 export interface HomePost {
   id: number,
+  userid: number,
   username: string,
   title: string,
   description: string

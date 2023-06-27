@@ -6,6 +6,7 @@ import CreatePost from './pages/CreatePost'
 import './styles/App.css'
 import Login from './pages/Login'
 import Post from './pages/Post'
+import Profile from './pages/Profile'
 
 function App() {
 
@@ -18,6 +19,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/post/create" element={<CreatePost />} />
         <Route path="/post/:id" element={<Post />} />
+        <Route path="/user/:id" element={<Profile />} />
       </Routes>
     </div>
 

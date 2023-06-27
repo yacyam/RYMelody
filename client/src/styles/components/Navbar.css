@@ -36,3 +36,7 @@
   background-color: #190061;
   color: white;
 }
+
+.navbar--left .navbar--create-post {
+  font-size: 14px;
+}

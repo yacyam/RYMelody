@@ -27,7 +27,13 @@ export default function Navbar() {
 
   return (
     <div className='navbar--container'>
-      <Link to="/">Review Your Melody</Link>
+      <div className='navbar--left'>
+        <Link to="/">Review Your Melody</Link>
+        {isLoggedIn &&
+          <Link to="/post/create" className='navbar--create-post'>+ Create New Post</Link>
+        }
+      </div>
+
 
       <div className='navbar--links'>
         {

@@ -4,6 +4,9 @@ import { User, OptionalUser } from "../database/User";
 import { QueryResult } from 'pg'
 
 async function findById(id: number): Promise<User | undefined> {
+  if (isNaN(id) || id === Infinity || id === undefined) {
+    return undefined
+  }
   const userDB = await pool.query(Query.findById, [id])
   const userRows = userDB.rows
   if (userRows.length === 0) {

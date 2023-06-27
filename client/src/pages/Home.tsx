@@ -28,8 +28,6 @@ export default function Home() {
 
   return (
     <div className='home--container'>
-      <Link to="/post/create" className='home--create-post'>+ Create New Post</Link>
-
       {homePostElements}
     </div>
   )

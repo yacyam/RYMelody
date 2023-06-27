@@ -3,7 +3,9 @@ import "../styles/components/Edit.css"
 
 interface PropTypes {
   text: string,
-  updateFunc: (arg: { text: string }) => Promise<void>
+  updateFunc: (arg: { text: string }) => Promise<void>,
+  width?: string,
+  height?: string
 }
 
 export function Edit(props: PropTypes) {
@@ -24,8 +26,13 @@ export function Edit(props: PropTypes) {
 
   return (
     <div className="edit--container">
-      <form onSubmit={submitForm}>
-        <textarea name="text" value={formDesc.text} onChange={updateForm} />
+      <form onSubmit={submitForm} className="edit--form">
+        <textarea
+          name="text"
+          value={formDesc.text}
+          onChange={updateForm}
+          style={{ width: props.width, height: props.height }}
+        />
         <button>Save</button>
       </form>
 

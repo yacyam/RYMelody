@@ -25,6 +25,7 @@ async function createComment(
 
 async function getPosts(amount: string): Promise<HomePost[]> {
   const firstPosts: QueryResult = await pool.query(Query.getPosts, [amount])
+  console.log(firstPosts.rows[0])
   return firstPosts.rows
 }
 

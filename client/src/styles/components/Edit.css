@@ -1,5 +1,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans&family=Playfair+Display&display=swap');
 
+.edit--form {
+  display: flex;
+  flex-direction: column;
+}
+
+.edit--form button {
+  width: 50px;
+}
+
 .edit--container textarea {
   font-family: 'Open Sans', sans-serif;
   width: 100%;

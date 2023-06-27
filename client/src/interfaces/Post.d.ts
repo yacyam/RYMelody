@@ -6,6 +6,7 @@ export interface Comment {
 
 export interface HighlightPost {
   id: number,
+  userId: number,
   username: string,
   title: string,
   description: string

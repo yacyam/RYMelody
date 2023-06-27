@@ -116,11 +116,44 @@ async function authorizeUpdateForm(
   return errors
 }
 
+async function authorizeUserAndSession(
+  userId: number,
+  sessionUserId: number
+) {
+  if (isNaN(userId) || userId === Infinity || userId === undefined) {
+    return [{ message: 'This User Profile Does Not Exist' }]
+  }
+  const user = await User.findById(userId)
+  if (!user) {
+    return [{ message: 'This User Profile Does Not Exist' }]
+  }
+  if (userId !== sessionUserId) {
+    return [{ message: 'Must Be Signed In As User to Update Profile' }]
+  }
 
+  return []
+}
+
+async function authorizeUpdateProfile(
+  userId: number,
+  sessionUserId: number,
+  text: string,
+  textLength: number
+): Promise<{ message: string }[]> {
+  const errors = await authorizeUserAndSession(userId, sessionUserId)
+  if (errors.length > 0) return errors
+
+  if (text.length > textLength) {
+    return [{ message: 'Contact Length Must be 5 - 50 Characters Long' }]
+  }
+
+  return []
+}
 
 export {
   authorizeRegisterForm,
   authorizePostForm,
   authorizeCommentForm,
-  authorizeUpdateForm
+  authorizeUpdateForm,
+  authorizeUpdateProfile
 }

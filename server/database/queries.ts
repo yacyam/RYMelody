@@ -8,7 +8,7 @@ const createUser = "INSERT INTO users (username, email, password) VALUES ($1, $2
 //
 // POSTS
 //
-const getPosts = "SELECT posts.id, username, title, description FROM posts JOIN users ON posts.userId = users.id LIMIT $1"
+const getPosts = "SELECT posts.id, posts.userId, username, title, description FROM posts JOIN users ON posts.userId = users.id LIMIT $1"
 const findPostById = "SELECT posts.id, posts.userId, username, title, description, audio FROM posts JOIN users ON posts.userId = users.id WHERE posts.id = $1"
 const findCommentsById = "SELECT comments.id, username, comment FROM comments JOIN users ON comments.userId = users.id WHERE postId = $1"
 const didUserLikePost = "SELECT * FROM postlikes WHERE userId = $1 AND postId = $2"
@@ -26,6 +26,19 @@ const deletePost = "DELETE FROM posts WHERE id = $1"
 const deleteComments = "DELETE FROM comments WHERE postId = $1"
 const deleteLikes = "DELETE FROM postlikes WHERE postId = $1"
 
+
+//
+// Profile
+//
+
+const findProfileById = "SELECT id, username, contact, bio FROM users JOIN userprofile ON users.id = userprofile.userId WHERE id = $1"
+const getAllPosts = "SELECT posts.id, posts.userId, username, title, description FROM posts JOIN users ON posts.userId = users.id WHERE posts.userId = $1"
+const getAllPostsFromLikes = "SELECT posts.id, posts.userId, username, title, description FROM posts JOIN users ON posts.userId = users.id JOIN postlikes ON posts.id = postlikes.postId WHERE postlikes.userId = $1"
+
+const createDefaultProfile = "INSERT INTO userprofile (userId) VALUES ($1)"
+
+const updateContact = "UPDATE userprofile SET contact = $2 WHERE userId = $1"
+const updateBio = "UPDATE userprofile SET bio = $2 WHERE userId = $1"
 
 export {
   getUsers,
@@ -46,5 +59,11 @@ export {
   deletePost,
   deleteComments,
   deleteLikes,
-  updateDescription
+  updateDescription,
+  findProfileById,
+  getAllPosts,
+  getAllPostsFromLikes,
+  createDefaultProfile,
+  updateContact,
+  updateBio
 }
