@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { UserProfile } from "../interfaces/Profile"
 import { Edit } from "./Edit"
+import "../styles/pages/Profile.css"
 
 interface PropTypes extends UserProfile {
   updateContactFunc: (arg: { text: string }) => Promise<void>,
@@ -42,8 +43,10 @@ export default function MainProfile(props: PropTypes) {
             height={'20px'}
           />
           :
-          <h3>Contact: {props.contact}</h3>}
-        <p onClick={updateEditingContact}>{isEditingContact ? "Cancel" : "Edit"}</p>
+          <h3>Contact: <p className="mainprofile--contact-text">{props.contact}</p></h3>}
+        <p className="mainprofile--edit" onClick={updateEditingContact}>
+          {isEditingContact ? "Cancel" : "Edit"}
+        </p>
 
         {isEditingBio ?
           <Edit
@@ -51,23 +54,29 @@ export default function MainProfile(props: PropTypes) {
             updateFunc={updateBio}
           />
           :
-          <h3>Bio: {props.bio}</h3>
+          <h3>Bio: <p className="mainprofile--bio-text">{props.bio}</p></h3>
         }
-        <p onClick={updateEditingBio}>{isEditingBio ? "Cancel" : "Edit"}</p>
+        <p className="mainprofile--edit" onClick={updateEditingBio}>
+          {isEditingBio ? "Cancel" : "Edit"}
+        </p>
       </>
     )
   }
 
   return (
     <div className="mainprofile--container">
-      <h1>{props.username}'s Profile</h1>
-      {
-        props.canModify ? createEditable() :
-          <>
-            {props.contact && <h3>Contact: {props.contact}</h3>}
-            {props.bio && <h3>Bio: {props.bio}</h3>}
-          </>
-      }
+      <h1 className="mainprofile--username">{props.username}'s Profile</h1>
+      <div className="mainprofile--content">
+        {
+          props.canModify ? createEditable() :
+            <>
+              {props.contact && <h3>Contact: <p className="mainprofile--contact-text">{props.contact}</p></h3>}
+              {props.bio && <h3>Bio: <p className="mainprofile--bio-text">{props.bio}</p></h3>}
+            </>
+        }
+        <h3>Total Posts: {props.posts.length}</h3>
+        <h3>Total Likes: {props.likes.length}</h3>
+      </div>
     </div>
   )
 }

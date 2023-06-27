@@ -3,6 +3,7 @@ import "../styles/pages/Profile.css"
 import { useEffect, useState } from "react";
 import { UserProfile } from "../interfaces/Profile";
 import MainProfile from "../components/MainProfile";
+import HomePost from "../components/HomePost";
 
 export default function Profile() {
   const { id } = useParams()
@@ -73,9 +74,25 @@ export default function Profile() {
     )
   }
 
+  const postsElements = userProfile?.posts.map(post => {
+    return HomePost(post)
+  })
+
+  const likeElements = userProfile?.likes.map(like => {
+    return HomePost(like)
+  })
+
   return (
     <div className="profile--container">
       {ProfileComponent()}
+      <div className="profile--posts">
+        <h1 className="profile--posts-title">Posts</h1>
+        {postsElements}
+      </div>
+      <div className="profile--likes">
+        <h1 className="profile--likes-title">Likes</h1>
+        {likeElements}
+      </div>
     </div>
   )
 }
