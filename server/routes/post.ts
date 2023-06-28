@@ -81,7 +81,7 @@ router.post('/comment', async (req, res) => {
     try {
       const generatedId = await Post.createComment(postId, userId, comment)
       const username = (req.user as User).username
-      res.status(200).send({ id: generatedId, username: username })
+      res.status(200).send({ id: generatedId, userId, username: username })
     } catch (err) {
       res.sendStatus(500)
     }

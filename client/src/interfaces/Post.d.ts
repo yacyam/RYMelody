@@ -1,12 +1,13 @@
 export interface Comment {
   id: number,
+  userid: number,
   username: string,
   comment: string
 }
 
 export interface HighlightPost {
   id: number,
-  userId: number,
+  userid: number,
   username: string,
   title: string,
   description: string

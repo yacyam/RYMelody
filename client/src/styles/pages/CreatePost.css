@@ -63,11 +63,35 @@
   background-color: #928aff;
 }
 
-.createpost--form button {
+.createpost--form .button--submit {
   border: none;
   background-color: #a29bfe;
 }
 
-.createpost--form button:hover {
+.createpost--form .button--submit:hover {
   background-color: #928aff;
+}
+
+.createpost--form-tags {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+}
+
+.tag--select {
+  padding: 10px;
+  min-width: 60px;
+  background: none;
+  color: white;
+  border: 1px solid white;
+  transition: all 0.2s ease-in;
+}
+
+.select:hover {
+  border: 1px solid rgb(214, 149, 255);
+  color: rgb(214, 149, 255);
+}
+
+.selected {
+  background: rgb(214, 149, 255);
 }

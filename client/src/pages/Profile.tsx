@@ -8,7 +8,8 @@ import HomePost from "../components/HomePost";
 export default function Profile() {
   const { id } = useParams()
   const [userProfile, setUserProfile] = useState<UserProfile | undefined>()
-  console.log(userProfile)
+  const [amountShowPosts, setAmountShowPosts] = useState(3)
+  const [amountShowLikes, setAmountShowLikes] = useState(3)
 
   useEffect(() => {
     fetch(`http://localhost:3000/user/${id}`, {
@@ -74,13 +75,24 @@ export default function Profile() {
     )
   }
 
+  function updateAmountShow(updateShow: (arg0: (value: number) => number) => void) {
+    updateShow(oldAmount => oldAmount + 3)
+  }
+
   const postsElements = userProfile?.posts.map(post => {
-    return HomePost(post)
-  })
+    return <div key={post.id}>
+      {HomePost(post)}
+    </div>
+  }).filter((_, i) => i < amountShowPosts)
 
   const likeElements = userProfile?.likes.map(like => {
-    return HomePost(like)
-  })
+    return <div key={like.id}>
+      {HomePost(like)}
+    </div>
+  }).filter((_, i) => i < amountShowLikes)
+
+  const allPostsLength = userProfile?.posts.length || 0
+  const allLikesLength = userProfile?.posts.length || 0
 
   return (
     <div className="profile--container">
@@ -88,10 +100,24 @@ export default function Profile() {
       <div className="profile--posts">
         <h1 className="profile--posts-title">Posts</h1>
         {postsElements}
+        {amountShowPosts < allPostsLength &&
+          <div className="profile--button-container">
+            <button onClick={() => updateAmountShow(setAmountShowPosts)}>
+              See More
+            </button>
+          </div>
+        }
       </div>
       <div className="profile--likes">
         <h1 className="profile--likes-title">Likes</h1>
         {likeElements}
+        {amountShowLikes < allLikesLength &&
+          <div className="profile--button-container">
+            <button onClick={() => updateAmountShow(setAmountShowLikes)}>
+              See More
+            </button>
+          </div>
+        }
       </div>
     </div>
   )

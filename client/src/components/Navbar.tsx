@@ -2,10 +2,9 @@ import { Link } from 'react-router-dom'
 import '../styles/components/Navbar.css'
 import { useContext } from 'react'
 import AuthContext from '../context/AuthContext'
-import pfp from '../images/default.jpeg'
 
 export default function Navbar() {
-  const { isLoggedIn } = useContext(AuthContext)
+  const { isLoggedIn, userData } = useContext(AuthContext)
   console.log(isLoggedIn)
 
   async function logout() {
@@ -30,7 +29,7 @@ export default function Navbar() {
       <div className='navbar--left'>
         <Link to="/">Review Your Melody</Link>
         {isLoggedIn &&
-          <Link to="/post/create" className='navbar--create-post'>+ Create New Post</Link>
+          <Link to="/post/create" className='navbar--create-post'>Create New Post</Link>
         }
       </div>
 
@@ -39,7 +38,9 @@ export default function Navbar() {
         {
           isLoggedIn ?
             <>
-              <img src={pfp} alt="" />
+              <Link className='navbar--username' to={`/user/${userData?.id}`}>
+                {userData?.username}
+              </Link>
               <button onClick={logout}>Logout</button>
             </>
             : <>

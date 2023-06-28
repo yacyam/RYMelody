@@ -1,17 +1,31 @@
 import { useState } from 'react'
 import '../styles/pages/CreatePost.css'
+import Tag from '../components/Tag'
 export default function CreatePost() {
 
   const [formData, setFormData] = useState({
     title: "",
     desc: "",
     audio: "",
-    audioSize: 0
+    audioSize: 0,
+    tags: ["pop"]
   })
 
   const [errors, setErrors] = useState(false)
 
   const [serverErrors, setServerErrors] = useState<{ message: string }[]>([])
+
+  const genreAndNameList: [string, string][] =
+    [
+      ["electronic", "Electronic"],
+      ["hiphop", "Hip Hop"],
+      ["pop", "Pop"],
+      ["rock", "Rock"],
+      ["punk", "Punk"],
+      ["metal", "Metal"],
+      ["jazz", "Jazz"],
+      ["classical", "Classical"]
+    ]
 
   function updateForm(e: React.SyntheticEvent) {
     const { name, value } = e.target as HTMLInputElement
@@ -90,6 +104,41 @@ export default function CreatePost() {
     return <li key={i}>{elem.message}</li>
   })
 
+  function updateTag(e: React.SyntheticEvent): void {
+    const { name } = e.target as HTMLInputElement
+
+    setFormData(oldFormData => {
+      const tagCopy = [...oldFormData.tags]
+      const isTagAlready = tagCopy.find((tag) => tag === name)
+      let newTags = []
+      if (isTagAlready) {
+        newTags = tagCopy.filter((tag) => tag !== name)
+      } else {
+        tagCopy.length === 2 && tagCopy.pop()
+        tagCopy.push(name)
+        newTags = tagCopy
+      }
+
+      return {
+        ...oldFormData,
+        tags: newTags
+      }
+    })
+  }
+
+  const tagElements = genreAndNameList.map((hold: [string, string]) => {
+    const [genre, name] = hold
+
+    const shouldHighlight = formData.tags.find((gen) => gen === genre)
+
+    return <Tag
+      genre={genre}
+      name={name}
+      style={shouldHighlight ? "selected" : "select"}
+      updateTag={updateTag}
+    />
+  })
+
   return (
     <div className="createpost--container">
       <h1 className='createpost--title'>Create Post</h1>
@@ -119,11 +168,16 @@ export default function CreatePost() {
           {errors && <h3>There was an error uploading this file, please try again</h3>}
         </div>
 
+        <div className='createpost--form-tags'>
+          <h5>Tags:</h5>
+          {tagElements}
+        </div>
+
         <ul>
           {serverErrorElements}
         </ul>
 
-        <button>Create Post</button>
+        <button className='button--submit'>Create Post</button>
 
       </form>
     </div>

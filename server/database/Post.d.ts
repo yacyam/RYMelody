@@ -17,6 +17,7 @@ export interface HomePost {
 
 export interface Comment {
   id: number,
+  userid: number,
   username: string,
   comment: string
 }

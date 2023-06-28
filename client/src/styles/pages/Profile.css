@@ -1,7 +1,7 @@
 .profile--container {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  grid-template-rows: 30% 70%;
+  grid-template-rows: 1fr calc(100% - 1fr);
   padding: 50px;
 }
 
@@ -38,6 +38,11 @@
 
 .profile--posts {
   justify-self: center;
+}
+
+.profile--button-container {
+  display: flex;
+  justify-content: center;
 }
 
 .profile--posts-title {

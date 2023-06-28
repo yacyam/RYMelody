@@ -19,12 +19,6 @@ export default function Post() {
   const [isEditing, setIsEditing] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
 
-  /**
-   * Idea: instead of adding a canmodify to each comment, check the comments when
-   * mapping to see if the current user in the session is the owner of that comment,
-   * then add a canmodify afterwards when creating the postcomment component.
-   */
-
   useEffect(() => {
     fetch(`http://localhost:3000/post/${id}`, {
       method: 'GET',
@@ -111,6 +105,11 @@ export default function Post() {
     }
   }
 
+  function gotoUserProfile(e: React.SyntheticEvent, userid: number) {
+    window.open(`http://localhost:5173/user/${userid}`, '_self')
+    e.stopPropagation();
+  }
+
   function createPostLayout() {
     if (!fullPostData) return undefined
 
@@ -120,7 +119,12 @@ export default function Post() {
       <div className="post--main-container">
         <div className="post--main-top-portion">
           <h3>{fullPostData.title}</h3>
-          <p>{fullPostData.username}</p>
+          <p
+            className="user-link"
+            onClick={(e: React.SyntheticEvent) => gotoUserProfile(e, fullPostData.userid)}
+          >
+            {fullPostData.username}
+          </p>
         </div>
 
         {isEditing ? <>
@@ -194,7 +198,7 @@ export default function Post() {
       }
     }
     else {
-      const { id, username } = await res.json()
+      const { id, userId, username } = await res.json()
 
       setFullPostData(oldPostData => {
         if (!oldPostData) return oldPostData
@@ -202,6 +206,7 @@ export default function Post() {
         const commentsCopy = [...oldPostData.comments]
         commentsCopy.push({
           id: id,
+          userid: userId,
           username: username,
           comment: formData.comment
         })

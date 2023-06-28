@@ -6,3 +6,12 @@
   overflow: auto;
   color: white;
 }
+
+* .user-link {
+  cursor: pointer;
+  width: 30px;
+}
+
+* .user-link:hover {
+  color: rgb(178, 188, 255);
+}

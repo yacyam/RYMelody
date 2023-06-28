@@ -10,7 +10,7 @@ const createUser = "INSERT INTO users (username, email, password) VALUES ($1, $2
 //
 const getPosts = "SELECT posts.id, posts.userId, username, title, description FROM posts JOIN users ON posts.userId = users.id LIMIT $1"
 const findPostById = "SELECT posts.id, posts.userId, username, title, description, audio FROM posts JOIN users ON posts.userId = users.id WHERE posts.id = $1"
-const findCommentsById = "SELECT comments.id, username, comment FROM comments JOIN users ON comments.userId = users.id WHERE postId = $1"
+const findCommentsById = "SELECT comments.id, comments.userId, username, comment FROM comments JOIN users ON comments.userId = users.id WHERE postId = $1"
 const didUserLikePost = "SELECT * FROM postlikes WHERE userId = $1 AND postId = $2"
 const getAllLikes = "SELECT COUNT(*) FROM postlikes WHERE postId = $1"
 const getCommentId = "SELECT comments.id FROM comments WHERE postId = $1 AND userId = $2"

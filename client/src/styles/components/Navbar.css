@@ -3,8 +3,8 @@
 .navbar--container {
   font-family: 'Open Sans', sans-serif;
   display: flex;
-  height: 50px;
-  padding: 0px 15px;
+  min-height: 50px;
+  padding: 5px 15px;
   justify-content: space-between;
   align-items: center;
   background-color: #190061;
@@ -37,6 +37,26 @@
   color: white;
 }
 
+.navbar--left {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+}
+
 .navbar--left .navbar--create-post {
   font-size: 14px;
+  color: rgb(152, 165, 252);
+}
+
+.navbar--create-post:hover {
+  color: rgb(178, 188, 255);
+}
+
+.navbar--username {
+  transition: color 0.1s ease-in;
+}
+
+.navbar--username:hover {
+  color: rgb(225, 229, 255);
 }
