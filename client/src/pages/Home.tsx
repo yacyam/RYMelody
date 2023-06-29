@@ -98,14 +98,14 @@ export default function Home() {
         <form className='home--query-form'>
 
           <label>Newest</label>
-          <input name="newest" type="radio" checked={formQuery.newest} onChange={updateSortQuery} />
+          <input className="newest--query" name="newest" type="checkbox" checked={formQuery.newest} onChange={updateSortQuery} />
 
 
           <label>Oldest</label>
-          <input name="oldest" type="radio" checked={formQuery.oldest} onChange={updateSortQuery} />
+          <input className="oldest--query" name="oldest" type="checkbox" checked={formQuery.oldest} onChange={updateSortQuery} />
 
           <label>Likes</label>
-          <input id="likes" name="likes" type="radio" checked={formQuery.likes} onChange={updateSortQuery} />
+          <input className="likes--query" id="likes" name="likes" type="checkbox" checked={formQuery.likes} onChange={updateSortQuery} />
 
           <label>Hip Hop</label>
           <input name="hiphop" type="checkbox" />

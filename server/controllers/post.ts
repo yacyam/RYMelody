@@ -26,16 +26,8 @@ async function createComment(
 }
 
 async function getPosts(amount: string, searchQuery: string, sortQuery: string): Promise<HomePost[]> {
-  if (sortQuery === "") {
-    const firstPosts: QueryResult = await pool.query(Query.getPosts, [amount, searchQuery])
-    return firstPosts.rows
-  }
-  if (sortQuery === "ASC" || sortQuery === "DESC") {
-    console.log(sortQuery)
-    const firstPosts: QueryResult = await pool.query(Query.getPostsByTime, [amount, searchQuery, sortQuery])
-    return firstPosts.rows
-  }
-  const firstPosts: QueryResult = await pool.query(Query.getPosts, [amount])
+  let generatedPostQuery = Query.createSearchQuery(sortQuery)
+  const firstPosts: QueryResult = await pool.query(generatedPostQuery, [amount, searchQuery])
   return firstPosts.rows
 }
 

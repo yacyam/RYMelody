@@ -9,10 +9,25 @@ const createUser = "INSERT INTO users (username, email, password) VALUES ($1, $2
 // POSTS
 //
 const tags = "electronic, hiphop, pop, rock, punk, metal, jazz, classical"
-const searchQuery = "LOWER(title) LIKE ('%' || LOWER($2) || '%')"
+const searchQuery = "WHERE LOWER(title) LIKE ('%' || LOWER($2) || '%')"
+const getPostTemplate = "SELECT posts.id, posts.userId, username, title, description FROM posts JOIN users ON posts.userId = users.id"
 
-const getPosts = `SELECT posts.id, posts.userId, username, title, description FROM posts JOIN users ON posts.userId = users.id WHERE ${searchQuery} LIMIT $1`
-const getPostsByTime = `SELECT posts.id, posts.userId, username, title, description FROM posts JOIN users ON posts.userId = users.id WHERE ${searchQuery} ORDER BY "time_posted" "DESC" LIMIT $1`
+function createSearchQuery(sortQuery: string) {
+  let orderQuery = ""
+  let joinQuery = ""
+  const limit = "LIMIT $1"
+  if (sortQuery === '') {
+    orderQuery = searchQuery
+  }
+  if (sortQuery === 'ASC' || sortQuery === 'DESC') {
+    orderQuery = searchQuery + "ORDER BY time_posted " + (sortQuery === 'ASC' ? 'ASC' : 'DESC')
+  }
+  if (sortQuery === 'LIKES') {
+    joinQuery = "LEFT JOIN postlikes ON posts.id = postlikes.postId " + searchQuery + " GROUP BY 1, 3"
+    orderQuery = "ORDER BY COUNT(postlikes.id) DESC"
+  }
+  return getPostTemplate + " " + joinQuery + " " + orderQuery + " " + limit
+}
 
 const findPostById = "SELECT posts.id, posts.userId, username, title, description, audio FROM posts JOIN users ON posts.userId = users.id WHERE posts.id = $1"
 const findCommentsById = "SELECT comments.id, comments.userId, username, comment FROM comments JOIN users ON comments.userId = users.id WHERE postId = $1"
@@ -56,8 +71,7 @@ export {
   findByEmail,
   findById,
   createUser,
-  getPosts,
-  getPostsByTime,
+  createSearchQuery,
   getAllLikes,
   getCommentId,
   findPostById,

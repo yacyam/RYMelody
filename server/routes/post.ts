@@ -48,6 +48,7 @@ router.get('/all', async (req, res) => {
     const allPosts = await Post.getPosts(amountPosts, searchQuery, sortQuery)
     res.status(200).send(allPosts)
   } catch (err) {
+    console.log(err)
     res.sendStatus(500)
   }
 })
