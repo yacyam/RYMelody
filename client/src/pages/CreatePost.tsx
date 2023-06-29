@@ -1,14 +1,22 @@
 import { useState } from 'react'
 import '../styles/pages/CreatePost.css'
 import Tag from '../components/Tag'
+interface Form {
+  title: string,
+  desc: string,
+  audio: string,
+  audioSize: number,
+  tags: string[]
+}
+
 export default function CreatePost() {
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<Form>({
     title: "",
     desc: "",
     audio: "",
     audioSize: 0,
-    tags: ["pop"]
+    tags: []
   })
 
   const [errors, setErrors] = useState(false)
@@ -80,10 +88,23 @@ export default function CreatePost() {
   async function submitForm(e: React.SyntheticEvent) {
     e.preventDefault()
 
+    const generatedTags = genreAndNameList.reduce((prev, [genre, _]) => {
+      const isInside = formData.tags.find((tag) => tag === genre)
+      return {
+        ...prev,
+        [genre]: isInside ? true : false
+      }
+    }, {})
+
+    const finalFormData = {
+      ...formData,
+      tags: generatedTags
+    }
+
     const res = await fetch('http://localhost:3000/post/create', {
       method: 'POST',
       'credentials': 'include',
-      body: JSON.stringify(formData),
+      body: JSON.stringify(finalFormData),
       headers: { 'Content-Type': 'application/json' }
     })
 
@@ -126,12 +147,13 @@ export default function CreatePost() {
     })
   }
 
-  const tagElements = genreAndNameList.map((hold: [string, string]) => {
+  const tagElements = genreAndNameList.map((hold: [string, string], i) => {
     const [genre, name] = hold
 
     const shouldHighlight = formData.tags.find((gen) => gen === genre)
 
     return <Tag
+      key={i}
       genre={genre}
       name={name}
       style={shouldHighlight ? "selected" : "select"}

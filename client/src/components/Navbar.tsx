@@ -5,7 +5,6 @@ import AuthContext from '../context/AuthContext'
 
 export default function Navbar() {
   const { isLoggedIn, userData } = useContext(AuthContext)
-  console.log(isLoggedIn)
 
   async function logout() {
     const res = await fetch('http://localhost:3000/auth/logout', {

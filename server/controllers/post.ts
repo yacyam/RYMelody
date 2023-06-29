@@ -1,6 +1,6 @@
 import { pool } from "../database/index"
 import * as Query from "../database/queries"
-import { HomePost, Post, Comment } from "../database/Post"
+import { HomePost, Post, Comment, Tags } from "../database/Post"
 import { QueryResult } from "pg"
 
 async function createPost(
@@ -8,9 +8,11 @@ async function createPost(
   title: string,
   desc: string,
   audio: string
-): Promise<void> {
+): Promise<string> {
 
-  await pool.query(Query.createPost, [userId, title, desc, audio])
+  const postId = await pool.query(Query.createPost, [userId, title, desc, audio])
+  const { id } = postId.rows[0]
+  return `${id}`
 }
 
 async function createComment(
@@ -23,7 +25,16 @@ async function createComment(
   return newId.rows[0]
 }
 
-async function getPosts(amount: string): Promise<HomePost[]> {
+async function getPosts(amount: string, searchQuery: string, sortQuery: string): Promise<HomePost[]> {
+  if (sortQuery === "") {
+    const firstPosts: QueryResult = await pool.query(Query.getPosts, [amount, searchQuery])
+    return firstPosts.rows
+  }
+  if (sortQuery === "ASC" || sortQuery === "DESC") {
+    console.log(sortQuery)
+    const firstPosts: QueryResult = await pool.query(Query.getPostsByTime, [amount, searchQuery, sortQuery])
+    return firstPosts.rows
+  }
   const firstPosts: QueryResult = await pool.query(Query.getPosts, [amount])
   return firstPosts.rows
 }
@@ -76,12 +87,43 @@ async function deletePost(postId: string): Promise<void> {
   await pool.query(Query.deletePost, [postId])
   await pool.query(Query.deleteComments, [postId])
   await pool.query(Query.deleteLikes, [postId])
+  await pool.query(Query.deleteTags, [postId])
+}
+
+async function createTags(postId: string, tags: Tags): Promise<void> {
+  await pool.query(Query.createTags,
+    [
+      postId,
+      tags.electronic,
+      tags.hiphop,
+      tags.pop,
+      tags.rock,
+      tags.punk,
+      tags.metal,
+      tags.jazz,
+      tags.classical
+    ]
+  )
+}
+
+async function getTags(postId: string): Promise<Tags> {
+  const tags: QueryResult = await pool.query(Query.getTags, [postId])
+
+  if (tags.rows.length === 0) {
+    await pool.query(Query.createDefaultTags, [postId])
+    const newTags: QueryResult = await pool.query(Query.getTags, [postId])
+    return newTags.rows[0]
+  }
+
+  return tags.rows[0]
 }
 
 export {
   getPosts,
   getAllLikes,
+  getTags,
   createPost,
+  createTags,
   findById,
   findCommentsById,
   userLikedPost,

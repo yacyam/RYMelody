@@ -180,3 +180,9 @@
 .liked:hover span {
   color: #fefefe;
 }
+
+.post--title-and-tags {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}

@@ -92,7 +92,7 @@ export default function Profile() {
   }).filter((_, i) => i < amountShowLikes)
 
   const allPostsLength = userProfile?.posts.length || 0
-  const allLikesLength = userProfile?.posts.length || 0
+  const allLikesLength = userProfile?.likes.length || 0
 
   return (
     <div className="profile--container">

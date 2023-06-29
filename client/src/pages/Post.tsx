@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom"
 import "../styles/pages/Post.css"
 import { useContext, useEffect, useState } from "react"
-import { FullPostData } from "../interfaces/Post"
+import { FullPostData, Tags } from "../interfaces/Post"
 import AuthContext from "../context/AuthContext"
 import PostComment from "../components/PostComment"
 import { Edit } from "../components/Edit"
@@ -105,6 +105,20 @@ export default function Post() {
     }
   }
 
+  function createTagString(tags: Tags) {
+    const allGenresList: string[] = []
+    for (const tag in tags) {
+      if (tags[tag]) {
+        allGenresList.push(tag.charAt(0).toUpperCase() + tag.substring(1))
+      }
+    }
+    if (allGenresList.length === 0) {
+      return ""
+    }
+    const allGenres = "Genres: " + allGenresList.reduce((prev, curr) => prev + ", " + curr)
+    return allGenres
+  }
+
   function gotoUserProfile(e: React.SyntheticEvent, userid: number) {
     window.open(`http://localhost:5173/user/${userid}`, '_self')
     e.stopPropagation();
@@ -114,17 +128,23 @@ export default function Post() {
     if (!fullPostData) return undefined
 
     const postLikedStyle = fullPostData.isPostLiked ? "liked" : ""
+    const fullGenres = createTagString(fullPostData.tags)
 
     return (
       <div className="post--main-container">
         <div className="post--main-top-portion">
-          <h3>{fullPostData.title}</h3>
+          <div className="post--title-and-tags">
+            <h3>{fullPostData.title}</h3>
+            {fullGenres && <p>○</p>}
+            <p>{fullGenres}</p>
+          </div>
           <p
             className="user-link"
             onClick={(e: React.SyntheticEvent) => gotoUserProfile(e, fullPostData.userid)}
           >
             {fullPostData.username}
           </p>
+
         </div>
 
         {isEditing ? <>

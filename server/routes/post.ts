@@ -5,19 +5,20 @@ import * as Post from "../controllers/post"
 const router = Router()
 
 router.post('/create', async (req, res) => {
-  let userId: number = 0
+  let userId = 0
   if ('user' in req) {
     userId = (req.user as User).id
   }
-  const { title, desc, audio, audioSize } = req.body
+  const { title, desc, audio, audioSize, tags } = req.body
 
-  const errors = authorizePostForm(title, desc, audio, audioSize, userId)
+  const errors = authorizePostForm(title, desc, audio, audioSize, tags, userId)
   if (errors.length > 0) {
     res.status(400).send(errors)
   }
   else {
     try {
-      await Post.createPost(userId, title, desc, audio)
+      const postId = await Post.createPost(userId, title, desc, audio)
+      await Post.createTags(postId, tags)
       res.sendStatus(200)
     } catch (err) {
       res.sendStatus(500)
@@ -27,11 +28,24 @@ router.post('/create', async (req, res) => {
 
 router.get('/all', async (req, res) => {
   let amountPosts = req.query.q
+  const { search, newest, oldest, likes } = req.query
+  console.log(amountPosts, search, newest, oldest, likes)
   if (typeof amountPosts !== 'string') {
     amountPosts = '10'
   }
+  const searchQuery: string = typeof search === 'string' ? search : ""
+  let sortQuery = ""
+  if (newest === 'true') {
+    sortQuery = "DESC"
+  }
+  else if (oldest === 'true') {
+    sortQuery = "ASC"
+  }
+  else if (likes === 'true') {
+    sortQuery = "LIKES"
+  }
   try {
-    const allPosts = await Post.getPosts(amountPosts)
+    const allPosts = await Post.getPosts(amountPosts, searchQuery, sortQuery)
     res.status(200).send(allPosts)
   } catch (err) {
     res.sendStatus(500)
@@ -47,6 +61,7 @@ router.get('/:id', async (req, res) => {
     }
     const allComments = await Post.findCommentsById(postId)
     const allLikes = await Post.getAllLikes(postId)
+    const allTags = await Post.getTags(postId)
     let isLikedByUser = false
     let canModify = false
     if ('user' in req) {
@@ -58,6 +73,7 @@ router.get('/:id', async (req, res) => {
     res.status(200).send({
       ...post,
       comments: allComments,
+      tags: allTags,
       amountLikes: allLikes,
       isPostLiked: isLikedByUser,
       canModify: canModify

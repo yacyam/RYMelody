@@ -21,3 +21,14 @@ export interface Comment {
   username: string,
   comment: string
 }
+
+export interface Tags {
+  electronic: boolean,
+  hiphop: boolean,
+  pop: boolean,
+  rock: boolean,
+  punk: boolean,
+  metal: boolean,
+  jazz: boolean,
+  classical: boolean
+}

@@ -1,5 +1,6 @@
 import * as User from "../controllers/user"
 import * as Post from "../controllers/post"
+import { Tags } from "../database/Post"
 const emailCheck = /^(?=.{1,254}$)(?=.{1,64}@)[-!#$%&'*+/0-9=?A-Z^_`a-z{|}~]+(\.[-!#$%&'*+/0-9=?A-Z^_`a-z{|}~]+)*@[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?(\.[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*$/
 
 async function authorizeRegisterForm(
@@ -50,6 +51,7 @@ function authorizePostForm(
   desc: string,
   audio: string,
   audioSize: number,
+  tags: Tags,
   userId: number
 ): { message: string }[] {
 
@@ -72,6 +74,22 @@ function authorizePostForm(
 
   if (audioSize > 1048576) {
     errors.push({ message: 'File Size Too Large, Please Keep Below 1MB' })
+  }
+
+  if (Object.keys(tags).length !== 8) {
+    errors.push({ message: 'Must Explicitly State All Tags' })
+  }
+
+  let allTags = 0
+  const tagsSelected = Object.values(tags)
+  tagsSelected.map((isSelected) => {
+    if (isSelected) {
+      allTags += 1
+    }
+  })
+
+  if (allTags > 2) {
+    errors.push({ message: 'Must Only Have At Most 2 Tags Selected' })
   }
 
   return errors

@@ -5,6 +5,17 @@ export interface Comment {
   comment: string
 }
 
+export interface Tags extends Record<string, boolean> {
+  electronic: boolean,
+  hiphop: boolean,
+  pop: boolean,
+  rock: boolean,
+  punk: boolean,
+  metal: boolean,
+  jazz: boolean,
+  classical: boolean
+}
+
 export interface HighlightPost {
   id: number,
   userid: number,
@@ -14,9 +25,9 @@ export interface HighlightPost {
 }
 
 export interface FullPost extends HighlightPost {
-  userid: number,
   audio: string,
-  comments: Comment[]
+  comments: Comment[],
+  tags: Tags
 }
 
 export interface FullPostData extends FullPost {
