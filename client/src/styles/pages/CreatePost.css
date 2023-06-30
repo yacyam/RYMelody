@@ -7,8 +7,9 @@
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  gap: 40px;
+  gap: 20px;
   font-size: 22px;
+  padding-bottom: 100px;
 }
 
 .createpost--container * {
@@ -24,6 +25,7 @@
 .createpost--form {
   display: flex;
   flex-direction: column;
+
   gap: 30px;
   width: 800px;
   height: 300px;
@@ -40,11 +42,12 @@
 
 
 
-.createpost--form textarea {
+.createpost--form-desc {
   display: flex;
   font-size: 14px;
   background-color: transparent;
-  height: 200px;
+  height: 150px;
+  min-height: 150px;
   border: none;
   border-bottom: 1px solid white;
   color: white;
@@ -74,13 +77,19 @@
 
 .createpost--form-tags {
   display: flex;
-  justify-content: space-evenly;
+  gap: 20px;
   align-items: center;
+}
+
+.createpost--all-tags {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .tag--select {
   padding: 10px;
-  min-width: 60px;
+  width: 80px;
   background: none;
   color: white;
   border: 1px solid white;
@@ -94,4 +103,10 @@
 
 .selected {
   background: rgb(214, 149, 255);
+}
+
+@media (max-width: 800px) {
+  .createpost--form {
+    width: 80vw;
+  }
 }

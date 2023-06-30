@@ -29,11 +29,12 @@ export function Edit(props: PropTypes) {
       <form onSubmit={submitForm} className="edit--form">
         <textarea
           name="text"
+          className="edit--form-text"
           value={formDesc.text}
           onChange={updateForm}
           style={{ width: props.width, height: props.height }}
         />
-        <button>Save</button>
+        <button className="edit--save-btn">Save</button>
       </form>
 
     </div>

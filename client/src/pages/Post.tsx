@@ -14,6 +14,7 @@ export default function Post() {
     comment: ""
   })
   const [errors, setErrors] = useState<{ message: string }[]>([])
+  const [doesNotExist, setDoesNotExist] = useState<boolean>(false)
   const [editDescErrors, setEditDescErrors] = useState<{ message: string }[]>([])
   const [fullPostData, setFullPostData] = useState<FullPostData | undefined>(undefined)
   const [isEditing, setIsEditing] = useState(false)
@@ -24,8 +25,14 @@ export default function Post() {
       method: 'GET',
       'credentials': 'include'
     })
-      .then(res => res.json())
+      .then(res => {
+        if (res.ok) {
+          return res.json()
+        }
+        throw new Error('Post Does Not Exist')
+      })
       .then(data => setFullPostData(data))
+      .catch(() => setDoesNotExist(true))
   }, [])
 
   async function likeOrUnlikePost(): Promise<void> {
@@ -127,7 +134,7 @@ export default function Post() {
   function createPostLayout() {
     if (!fullPostData) return undefined
 
-    const postLikedStyle = fullPostData.isPostLiked ? "liked" : ""
+    const postLikedStyle = fullPostData.isPostLiked ? "liked" : "like"
     const fullGenres = createTagString(fullPostData.tags)
 
     return (
@@ -159,9 +166,8 @@ export default function Post() {
         <audio className="post--audio" controls src={fullPostData.audio} />
 
         <div className="post--info">
-          <button className={`button button-like ${postLikedStyle}`} onClick={likeOrUnlikePost}>
-            <i className="fa fa-heart"></i>
-            <span>Like</span>
+          <button className={`like--select ${postLikedStyle}`} onClick={likeOrUnlikePost}>
+            Like
           </button>
           <p className="post--likes">+{fullPostData.amountLikes}</p>
         </div>
@@ -245,36 +251,42 @@ export default function Post() {
   })
 
   return (
-    <div className="post--container">
-      {postElement}
+    <>
+      {doesNotExist ? <h1 className="post--not-exist">This Post Does Not Exist</h1>
+        :
+        <div className="post--container">
+          {postElement}
 
-      {
-        !isLoggedIn ?
-          <h5 className="post--notlogged-comment">
-            Must be Logged in to Comment on Post
-          </h5>
-          :
-          <form className="post--comment-form" onSubmit={submitForm}>
-            <legend>Create a Comment on this Post</legend>
-            <textarea
-              name="comment"
-              className="post--comment-box"
-              placeholder="Comment"
-              onChange={updateForm}
-              value={formData.comment}
-            />
+          {
+            !isLoggedIn ?
+              <h5 className="post--notlogged-comment">
+                Must be Logged in to Comment on Post
+              </h5>
+              :
+              <form className="post--comment-form" onSubmit={submitForm}>
+                <legend>Create a Comment on this Post</legend>
+                <textarea
+                  name="comment"
+                  className="post--comment-box"
+                  placeholder="Comment"
+                  onChange={updateForm}
+                  value={formData.comment}
+                />
 
-            <ul>
-              {displayErrors}
-            </ul>
+                <ul>
+                  {displayErrors}
+                </ul>
 
-            <button>Post Comment</button>
-          </form>
+                <button>Post Comment</button>
+              </form>
+          }
+          <div className="post--all-comments">
+            <h2 className="post--all-comments-title">Comments</h2>
+            {commentElement}
+          </div>
+        </div>
       }
-      <div className="post--all-comments">
-        <h2 className="post--all-comments-title">Comments</h2>
-        {commentElement}
-      </div>
-    </div>
+
+    </>
   )
 }

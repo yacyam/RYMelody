@@ -16,14 +16,15 @@ input::placeholder {
 
 .register--form {
   background-color: #3500d3;
-  /* border-radius: 10px; */
+  border-radius: 8px;
   color: white;
   display: flex;
   flex-direction: column;
   justify-content: space-evenly;
   padding: 30px;
   width: 500px;
-  height: 500px;
+  height: 525px;
+  box-shadow: 0px 5px 5px rgba(128, 128, 128, 0.317);
 }
 
 .register--form input {

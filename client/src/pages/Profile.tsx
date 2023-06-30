@@ -10,13 +10,19 @@ export default function Profile() {
   const [userProfile, setUserProfile] = useState<UserProfile | undefined>()
   const [amountShowPosts, setAmountShowPosts] = useState(3)
   const [amountShowLikes, setAmountShowLikes] = useState(3)
+  const [doesNotExist, setDoesNotExist] = useState<boolean>(false)
 
   useEffect(() => {
     fetch(`http://localhost:3000/user/${id}`, {
       'credentials': 'include'
     })
-      .then(res => res.json())
+      .then(res => {
+        if (res.ok) return res.json()
+
+        throw new Error('User Does Not Exist')
+      })
       .then(data => setUserProfile(data))
+      .catch(() => setDoesNotExist(true))
   }, [])
 
   async function updateContact(data: { text: string }): Promise<void> {
@@ -95,30 +101,35 @@ export default function Profile() {
   const allLikesLength = userProfile?.likes.length || 0
 
   return (
-    <div className="profile--container">
-      {ProfileComponent()}
-      <div className="profile--posts">
-        <h1 className="profile--posts-title">Posts</h1>
-        {postsElements}
-        {amountShowPosts < allPostsLength &&
-          <div className="profile--button-container">
-            <button onClick={() => updateAmountShow(setAmountShowPosts)}>
-              See More
-            </button>
+    <>
+      {doesNotExist ? <h1 className="profile--user-not-exist">This User Does Not Exist</h1>
+        :
+        <div className="profile--container">
+          {ProfileComponent()}
+          <div className="profile--posts">
+            <h1 className="profile--posts-title">Posts</h1>
+            {postsElements}
+            {amountShowPosts < allPostsLength &&
+              <div className="profile--button-container">
+                <button onClick={() => updateAmountShow(setAmountShowPosts)}>
+                  See More
+                </button>
+              </div>
+            }
           </div>
-        }
-      </div>
-      <div className="profile--likes">
-        <h1 className="profile--likes-title">Likes</h1>
-        {likeElements}
-        {amountShowLikes < allLikesLength &&
-          <div className="profile--button-container">
-            <button onClick={() => updateAmountShow(setAmountShowLikes)}>
-              See More
-            </button>
+          <div className="profile--likes">
+            <h1 className="profile--likes-title">Likes</h1>
+            {likeElements}
+            {amountShowLikes < allLikesLength &&
+              <div className="profile--button-container">
+                <button onClick={() => updateAmountShow(setAmountShowLikes)}>
+                  See More
+                </button>
+              </div>
+            }
           </div>
-        }
-      </div>
-    </div>
+        </div>
+      }
+    </>
   )
 }

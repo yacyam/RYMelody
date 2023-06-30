@@ -11,17 +11,17 @@ async function updateProfilePortion(
   textLength: number,
   updateFunction: (id: number, text: string) => Promise<void>
 ) {
-  const id = parseInt(req.params.id)
+  const userId = req.params.id
   const { text } = req.body
   if (!('user' in req)) return res.sendStatus(401)
-  const userId = (req.user as User).id
+  const sessionUserId = (req.user as User).id
 
   try {
-    const errors = await authorizeUpdateProfile(userId, userId, text, textLength)
+    const errors = await authorizeUpdateProfile(userId, sessionUserId, text, textLength)
     if (errors.length > 0) {
       return res.status(400).send(errors)
     }
-    await updateFunction(id, text)
+    await updateFunction(sessionUserId, text)
     return res.sendStatus(200)
   } catch (err) {
     return res.sendStatus(500)
@@ -29,7 +29,7 @@ async function updateProfilePortion(
 }
 
 router.get('/:id', async (req, res) => {
-  const userId = parseInt(req.params.id)
+  const userId: string = req.params.id
   try {
     const user = await UserController.findById(userId)
     if (!user) return res.sendStatus(404)

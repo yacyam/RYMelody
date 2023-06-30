@@ -17,6 +17,7 @@
   padding: 10px;
   display: flex;
   flex-direction: column;
+  min-width: 400px;
   gap: 10px;
 }
 
@@ -45,6 +46,15 @@
   justify-content: center;
 }
 
+.profile--button-container button {
+  width: 80px;
+  border: none;
+  background-color: #3500d3;
+  color: white;
+  padding: 5px;
+  cursor: pointer;
+}
+
 .profile--posts-title {
   display: flex;
   justify-content: center;
@@ -59,4 +69,18 @@
   display: flex;
   justify-content: center;
   border-bottom: 1px solid white;
+}
+
+.profile--user-not-exist {
+  align-self: center;
+  margin: auto;
+  font-weight: 300;
+}
+
+@media (max-width: 1000px) {
+  .profile--container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
 }

@@ -4,11 +4,11 @@
   font-family: 'Open Sans', sans-serif;
   display: flex;
   flex-direction: column;
+
   padding: 20px;
-  min-width: 500px;
+
   height: 100%;
-  border-left: 400px solid #282828;
-  border-right: 400px solid #282828;
+
   color: rgb(255, 255, 255);
 }
 
@@ -112,77 +112,35 @@
   cursor: pointer;
 }
 
-.button-like {
+.like--select {
+  padding: 10px;
+  min-width: 60px;
   width: 70px;
-  height: 30px;
-  border: 2px solid #8a8a8a;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: transparent;
-  text-decoration: none;
-  padding: 1rem;
-  position: relative;
-
+  background: none;
   color: #8a8a8a;
-  transition: all ease 0.2s;
+  border: 1px solid #8a8a8a;
+  transition: all 0.2s ease-in;
 }
 
-.button-like .fa,
-.button-like span {
-  transition: all ease 0.4s;
-}
-
-.button-like:focus {
-  background-color: transparent;
-}
-
-.button-like:focus .fa,
-.button-like:focus span {
-  color: #8a8a8a;
-}
-
-.button-like:hover {
-  border-color: #cc4b37;
-  background-color: transparent;
-}
-
-.button-like:hover .fa,
-.button-like:hover span {
+.like:hover {
+  border: 1px solid #cc4b37;
   color: #cc4b37;
 }
 
 .liked {
-  background-color: #cc4b37;
-  border-color: #cc4b37;
-}
-
-.liked .fa,
-.liked span {
-  color: #fefefe;
-}
-
-.liked:focus {
-  background-color: #cc4b37;
-}
-
-.liked:focus .fa,
-.liked:focus span {
-  color: #fefefe;
-}
-
-.liked:hover {
-  background-color: #cc4b37;
-  border-color: #cc4b37;
-}
-
-.liked:hover .fa,
-.liked:hover span {
-  color: #fefefe;
+  background: #cc4b37;
+  border: 1px solid #cc4b37;
+  color: white;
 }
 
 .post--title-and-tags {
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+.post--not-exist {
+  align-self: center;
+  margin: auto;
+  font-weight: 300;
 }

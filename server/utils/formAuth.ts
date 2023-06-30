@@ -135,17 +135,15 @@ async function authorizeUpdateForm(
 }
 
 async function authorizeUserAndSession(
-  userId: number,
+  userId: string,
   sessionUserId: number
 ) {
-  if (isNaN(userId) || userId === Infinity || userId === undefined) {
-    return [{ message: 'This User Profile Does Not Exist' }]
-  }
   const user = await User.findById(userId)
   if (!user) {
     return [{ message: 'This User Profile Does Not Exist' }]
   }
-  if (userId !== sessionUserId) {
+
+  if (user.id !== sessionUserId) {
     return [{ message: 'Must Be Signed In As User to Update Profile' }]
   }
 
@@ -153,7 +151,7 @@ async function authorizeUserAndSession(
 }
 
 async function authorizeUpdateProfile(
-  userId: number,
+  userId: string,
   sessionUserId: number,
   text: string,
   textLength: number

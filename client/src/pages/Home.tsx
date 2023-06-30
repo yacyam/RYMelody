@@ -2,13 +2,13 @@ import { useEffect, useState } from 'react'
 import { HighlightPost } from '../interfaces/Post'
 import HomePost from '../components/HomePost'
 import Tags from '../components/Tags'
+import searchIcon from '../images/searchIcon.png'
 import '../styles/pages/Home.css'
 
 export default function Home() {
   const [firstPosts, setFirstPosts] = useState<HighlightPost[]>([])
-  const [numPosts, setNumPosts] = useState(8)
   const [formQuery, setFormQuery] = useState({
-    numPosts: 10,
+    numPosts: 8,
     search: "",
     newest: false,
     oldest: false,
@@ -81,14 +81,23 @@ export default function Home() {
     })
   }
 
+  function updateAmountPosts() {
+    setFormQuery(oldFormQuery => {
+      return {
+        ...oldFormQuery,
+        numPosts: oldFormQuery.numPosts + 8
+      }
+    })
+  }
+
   return (
     <div className='home--main'>
       <div className='home--left'>
         <div className='home--post-container'>
           {homePostElements}
         </div>
-        {numPosts <= homePostElements.length ?
-          <button onClick={() => setNumPosts(oldNum => oldNum + 8)}>
+        {formQuery.numPosts <= homePostElements.length ?
+          <button className='home--more-post-btn' onClick={updateAmountPosts}>
             See More Posts
           </button>
           :
@@ -98,9 +107,12 @@ export default function Home() {
 
       <div className='home--query'>
         <h2>Search</h2>
-        <input name="search" type="text" value={formQuery.search} onChange={updateSearchQuery} />
+        <div className='home--query-full-search'>
+          <img src={searchIcon} className='home--query-search-icon' alt="search icon" />
+          <input className="home--query-search" name="search" type="text" value={formQuery.search} onChange={updateSearchQuery} />
+        </div>
 
-        <h2>Filters</h2>
+        <h2 className='home--filters-title'>Filters</h2>
 
         <h4>Sort By</h4>
         <form className='home--query-form'>

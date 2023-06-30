@@ -16,7 +16,7 @@ export default function CreatePost() {
     title: "",
     desc: "",
     audio: "",
-    audioSize: 0,
+    audioSize: 0
   })
   const [allTags, setAllTags] = useState<{ tags: string[] }>({ tags: [] })
 
@@ -129,6 +129,7 @@ export default function CreatePost() {
         <textarea
           name="desc"
           placeholder="Description"
+          className='createpost--form-desc'
           onChange={updateForm}
           value={formData.desc}
         />
@@ -145,11 +146,13 @@ export default function CreatePost() {
 
         <div className='createpost--form-tags'>
           <h5>Tags:</h5>
-          <Tags
-            style=""
-            tags={allTags.tags}
-            updateTag={setAllTags}
-          />
+          <div className='createpost--all-tags'>
+            <Tags
+              style=""
+              tags={allTags.tags}
+              updateTag={setAllTags}
+            />
+          </div>
         </div>
 
         <ul>

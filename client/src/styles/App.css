@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans&family=Playfair+Display&display=swap');
+
 .app--container {
   height: 100vh;
   display: flex;
@@ -14,4 +16,8 @@
 
 * .user-link:hover {
   color: rgb(178, 188, 255);
+}
+
+* button {
+  font-family: 'Open Sans', sans-serif;
 }

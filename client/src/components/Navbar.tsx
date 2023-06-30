@@ -40,7 +40,7 @@ export default function Navbar() {
               <Link className='navbar--username' to={`/user/${userData?.id}`}>
                 {userData?.username}
               </Link>
-              <button onClick={logout}>Logout</button>
+              <button className='navbar--logout' onClick={logout}>Logout</button>
             </>
             : <>
               <Link to="/login">Login</Link>

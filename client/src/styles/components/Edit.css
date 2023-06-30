@@ -3,10 +3,24 @@
 .edit--form {
   display: flex;
   flex-direction: column;
+  gap: 5px;
 }
 
-.edit--form button {
+.edit--form-text {
+  background: rgba(128, 128, 128, 0.18);
+  color: white;
+  border: none;
+  border-bottom: 1px solid white;
+  padding: 5px;
+}
+
+.edit--save-btn {
   width: 50px;
+  border: none;
+  background-color: #3500d3;
+  color: white;
+  padding: 2px;
+  cursor: pointer;
 }
 
 .edit--container textarea {

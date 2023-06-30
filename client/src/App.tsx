@@ -7,6 +7,7 @@ import './styles/App.css'
 import Login from './pages/Login'
 import Post from './pages/Post'
 import Profile from './pages/Profile'
+import NotFound from './pages/NotFound'
 
 function App() {
 
@@ -20,6 +21,7 @@ function App() {
         <Route path="/post/create" element={<CreatePost />} />
         <Route path="/post/:id" element={<Post />} />
         <Route path="/user/:id" element={<Profile />} />
+        <Route path="/*" element={<NotFound />} />
       </Routes>
     </div>
 
