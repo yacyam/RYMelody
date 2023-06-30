@@ -3,6 +3,11 @@ import * as Query from "../database/queries"
 import { User, OptionalUser } from "../database/User";
 import { QueryResult } from 'pg'
 
+/**
+ * Obtains user information associated with id
+ * @param id 
+ * @returns Main user info if user with id exists, otherwise returns undefined
+ */
 async function findById(id: string | number): Promise<User | undefined> {
   const userDB = await pool.query(Query.findById, [id])
   const userRows = userDB.rows
@@ -13,6 +18,11 @@ async function findById(id: string | number): Promise<User | undefined> {
   return user
 }
 
+/**
+ * Obtains the user associated with username or password
+ * @param userOpt Contains either the username or email of the user
+ * @returns Main user information if username/email exists, undefined otherwise
+ */
 async function findOne(userOpt: OptionalUser): Promise<User | undefined> {
   let userDB: QueryResult
   if (userOpt.username) {
@@ -34,6 +44,12 @@ async function findOne(userOpt: OptionalUser): Promise<User | undefined> {
   return user
 }
 
+/**
+ * Registers a user with the username, email, and password
+ * @param username 
+ * @param email 
+ * @param hashedPassword A hashed representation of the password 
+ */
 async function createUser(
   username: string,
   email: string,

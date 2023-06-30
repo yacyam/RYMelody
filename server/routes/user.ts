@@ -5,12 +5,19 @@ import * as Profile from '../controllers/profile'
 import { authorizeUpdateProfile } from '../utils/formAuth'
 const router = Router()
 
+/**
+ * Updates portion of profile with new information
+ * @param req Request received by router
+ * @param res Response received by router
+ * @param textLength Maximum length for the updating text
+ * @param updateFunction Serializes the text in the database with the user id
+ */
 async function updateProfilePortion(
   req: Request,
   res: Response,
   textLength: number,
   updateFunction: (id: number, text: string) => Promise<void>
-) {
+): Promise<Response> {
   const userId = req.params.id
   const { text } = req.body
   if (!('user' in req)) return res.sendStatus(401)

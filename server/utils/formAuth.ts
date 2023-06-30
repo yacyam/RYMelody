@@ -3,6 +3,14 @@ import * as Post from "../controllers/post"
 import { Tags } from "../database/Post"
 const emailCheck = /^(?=.{1,254}$)(?=.{1,64}@)[-!#$%&'*+/0-9=?A-Z^_`a-z{|}~]+(\.[-!#$%&'*+/0-9=?A-Z^_`a-z{|}~]+)*@[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?(\.[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*$/
 
+/**
+ * Checks if all registration parameters are valid to create a user
+ * @param username 
+ * @param email 
+ * @param password 
+ * @param confirmPassword 
+ * @returns All the errors associated with the register form
+ */
 async function authorizeRegisterForm(
   username: string,
   email: string,
@@ -46,6 +54,16 @@ async function authorizeRegisterForm(
   return errors
 }
 
+/**
+ * Checks if all post parameters are valid to create a new post
+ * @param title 
+ * @param desc 
+ * @param audio Audio file encoded inside of a string
+ * @param audioSize Size of the audio file
+ * @param tags 
+ * @param userId 
+ * @returns All errors associated with the post
+ */
 function authorizePostForm(
   title: string,
   desc: string,
@@ -95,6 +113,12 @@ function authorizePostForm(
   return errors
 }
 
+/**
+ * Checks if comment parameters are valid to create a new comment
+ * @param postId 
+ * @param comment 
+ * @returns All errors associated with the comment
+ */
 async function authorizeCommentForm(
   postId: string,
   comment: string
@@ -112,6 +136,13 @@ async function authorizeCommentForm(
   return errors
 }
 
+/**
+ * Checks if the post parameters are valid to update the description of a post
+ * @param userId 
+ * @param postId 
+ * @param text 
+ * @returns All the errors associated with the post update
+ */
 async function authorizeUpdateForm(
   userId: number,
   postId: string,
@@ -134,6 +165,12 @@ async function authorizeUpdateForm(
   return errors
 }
 
+/**
+ * Checks if the user id and the user serialized into the session are the same
+ * @param userId 
+ * @param sessionUserId 
+ * @returns All errors associated with the user authorization
+ */
 async function authorizeUserAndSession(
   userId: string,
   sessionUserId: number
@@ -150,6 +187,15 @@ async function authorizeUserAndSession(
   return []
 }
 
+/**
+ * Checks whether the profile parameters are valid to update the profile with
+ * the new text
+ * @param userId 
+ * @param sessionUserId 
+ * @param text 
+ * @param textLength 
+ * @returns All errors associated with the profile update
+ */
 async function authorizeUpdateProfile(
   userId: string,
   sessionUserId: number,
