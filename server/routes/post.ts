@@ -27,13 +27,11 @@ router.post('/create', async (req, res) => {
 })
 
 router.get('/all', async (req, res) => {
-  let amountPosts = req.query.q
-  const { search, newest, oldest, likes } = req.query
-  console.log(amountPosts, search, newest, oldest, likes)
-  if (typeof amountPosts !== 'string') {
-    amountPosts = '10'
-  }
-  const searchQuery: string = typeof search === 'string' ? search : ""
+  let amountPosts = (req.query.q as string)
+  const searchQuery = (req.query.search as string)
+  const tagQuery = (req.query.tags as undefined | string | string[])
+  const { newest, oldest, likes } = req.query
+
   let sortQuery = ""
   if (newest === 'true') {
     sortQuery = "DESC"
@@ -45,7 +43,7 @@ router.get('/all', async (req, res) => {
     sortQuery = "LIKES"
   }
   try {
-    const allPosts = await Post.getPosts(amountPosts, searchQuery, sortQuery)
+    const allPosts = await Post.getPosts(amountPosts, searchQuery, sortQuery, tagQuery)
     res.status(200).send(allPosts)
   } catch (err) {
     console.log(err)

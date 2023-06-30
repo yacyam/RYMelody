@@ -12,19 +12,32 @@ const tags = "electronic, hiphop, pop, rock, punk, metal, jazz, classical"
 const searchQuery = "WHERE LOWER(title) LIKE ('%' || LOWER($2) || '%')"
 const getPostTemplate = "SELECT posts.id, posts.userId, username, title, description FROM posts JOIN users ON posts.userId = users.id"
 
-function createSearchQuery(sortQuery: string) {
+function createSearchQuery(sortQuery: string, tagsQuery: undefined | string[]) {
   let orderQuery = ""
   let joinQuery = ""
+  let tagQuery = ""
+  let searchAndTagQ = searchQuery
   const limit = "LIMIT $1"
+  if (tagsQuery !== undefined) {
+    joinQuery = "JOIN posttags ON posts.id = posttags.postId"
+    tagQuery = "(" + tagsQuery.reduce((prev, curr) => {
+      if (prev === "") {
+        return curr + " = TRUE"
+      }
+      return prev + " OR " + curr + " = TRUE"
+    }, "") + ")"
+    searchAndTagQ += " AND " + tagQuery
+  }
+
   if (sortQuery === '') {
-    orderQuery = searchQuery
+    orderQuery = searchAndTagQ
   }
   if (sortQuery === 'ASC' || sortQuery === 'DESC') {
-    orderQuery = searchQuery + "ORDER BY time_posted " + (sortQuery === 'ASC' ? 'ASC' : 'DESC')
+    orderQuery = searchAndTagQ + " ORDER BY time_posted " + (sortQuery === 'ASC' ? 'ASC' : 'DESC')
   }
   if (sortQuery === 'LIKES') {
-    joinQuery = "LEFT JOIN postlikes ON posts.id = postlikes.postId " + searchQuery + " GROUP BY 1, 3"
-    orderQuery = "ORDER BY COUNT(postlikes.id) DESC"
+    joinQuery += " LEFT JOIN postlikes ON posts.id = postlikes.postId "
+    orderQuery = searchAndTagQ + " GROUP BY 1, 3 " + "ORDER BY COUNT(postlikes.id) DESC"
   }
   return getPostTemplate + " " + joinQuery + " " + orderQuery + " " + limit
 }

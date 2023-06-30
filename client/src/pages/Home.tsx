@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { HighlightPost } from '../interfaces/Post'
 import HomePost from '../components/HomePost'
+import Tags from '../components/Tags'
 import '../styles/pages/Home.css'
 
 export default function Home() {
@@ -13,6 +14,7 @@ export default function Home() {
     oldest: false,
     likes: false
   })
+  const [allTags, setAllTags] = useState<{ tags: string[] }>({ tags: [] })
 
   function queryStringCreate() {
     const numPost = `?q=${formQuery.numPosts}`
@@ -21,7 +23,11 @@ export default function Home() {
     const oldestQ = "oldest=" + (formQuery.oldest ? "true" : "false")
     const likesQ = "likes=" + (formQuery.likes ? "true" : "false")
 
-    const fullQuery = numPost + "&" + searchQ + "&" + newestQ + "&" + oldestQ + "&" + likesQ
+    const fullTags = allTags.tags.reduce((prev, curr) => {
+      return prev + "&" + "tags=" + curr
+    }, "&")
+
+    const fullQuery = numPost + "&" + searchQ + "&" + newestQ + "&" + oldestQ + "&" + likesQ + fullTags
 
     return fullQuery
   }
@@ -94,6 +100,8 @@ export default function Home() {
         <h2>Search</h2>
         <input name="search" type="text" value={formQuery.search} onChange={updateSearchQuery} />
 
+        <h2>Filters</h2>
+
         <h4>Sort By</h4>
         <form className='home--query-form'>
 
@@ -106,12 +114,16 @@ export default function Home() {
 
           <label>Likes</label>
           <input className="likes--query" id="likes" name="likes" type="checkbox" checked={formQuery.likes} onChange={updateSortQuery} />
-
-          <label>Hip Hop</label>
-          <input name="hiphop" type="checkbox" />
         </form>
 
-
+        <h4>Genres</h4>
+        <div className='home--genre-query'>
+          <Tags
+            style=""
+            tags={allTags.tags}
+            updateTag={setAllTags}
+          />
+        </div>
 
       </div>
     </div>

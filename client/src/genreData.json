@@ -1,0 +1,36 @@
+{
+  "genres": [
+    [
+      "electronic",
+      "Electronic"
+    ],
+    [
+      "hiphop",
+      "Hip Hop"
+    ],
+    [
+      "pop",
+      "Pop"
+    ],
+    [
+      "rock",
+      "Rock"
+    ],
+    [
+      "punk",
+      "Punk"
+    ],
+    [
+      "metal",
+      "Metal"
+    ],
+    [
+      "jazz",
+      "Jazz"
+    ],
+    [
+      "classical",
+      "Classical"
+    ]
+  ]
+}

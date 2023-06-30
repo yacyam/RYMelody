@@ -25,8 +25,14 @@ async function createComment(
   return newId.rows[0]
 }
 
-async function getPosts(amount: string, searchQuery: string, sortQuery: string): Promise<HomePost[]> {
-  let generatedPostQuery = Query.createSearchQuery(sortQuery)
+async function getPosts(
+  amount: string,
+  searchQuery: string,
+  sortQuery: string,
+  tagsQuery: undefined | string | string[]
+): Promise<HomePost[]> {
+  const wrapTags = typeof tagsQuery === 'string' ? [tagsQuery] : tagsQuery
+  let generatedPostQuery = Query.createSearchQuery(sortQuery, wrapTags)
   const firstPosts: QueryResult = await pool.query(generatedPostQuery, [amount, searchQuery])
   return firstPosts.rows
 }

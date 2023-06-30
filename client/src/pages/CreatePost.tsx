@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import '../styles/pages/CreatePost.css'
-import Tag from '../components/Tag'
+import Tags from '../components/Tags'
+import { genres } from "../genreData.json"
+
 interface Form {
   title: string,
   desc: string,
   audio: string,
-  audioSize: number,
-  tags: string[]
+  audioSize: number
 }
 
 export default function CreatePost() {
@@ -16,24 +17,12 @@ export default function CreatePost() {
     desc: "",
     audio: "",
     audioSize: 0,
-    tags: []
   })
+  const [allTags, setAllTags] = useState<{ tags: string[] }>({ tags: [] })
 
   const [errors, setErrors] = useState(false)
 
   const [serverErrors, setServerErrors] = useState<{ message: string }[]>([])
-
-  const genreAndNameList: [string, string][] =
-    [
-      ["electronic", "Electronic"],
-      ["hiphop", "Hip Hop"],
-      ["pop", "Pop"],
-      ["rock", "Rock"],
-      ["punk", "Punk"],
-      ["metal", "Metal"],
-      ["jazz", "Jazz"],
-      ["classical", "Classical"]
-    ]
 
   function updateForm(e: React.SyntheticEvent) {
     const { name, value } = e.target as HTMLInputElement
@@ -88,8 +77,8 @@ export default function CreatePost() {
   async function submitForm(e: React.SyntheticEvent) {
     e.preventDefault()
 
-    const generatedTags = genreAndNameList.reduce((prev, [genre, _]) => {
-      const isInside = formData.tags.find((tag) => tag === genre)
+    const generatedTags = genres.reduce((prev, [genre]) => {
+      const isInside = allTags.tags.find((tag) => tag === genre)
       return {
         ...prev,
         [genre]: isInside ? true : false
@@ -125,42 +114,6 @@ export default function CreatePost() {
     return <li key={i}>{elem.message}</li>
   })
 
-  function updateTag(e: React.SyntheticEvent): void {
-    const { name } = e.target as HTMLInputElement
-
-    setFormData(oldFormData => {
-      const tagCopy = [...oldFormData.tags]
-      const isTagAlready = tagCopy.find((tag) => tag === name)
-      let newTags = []
-      if (isTagAlready) {
-        newTags = tagCopy.filter((tag) => tag !== name)
-      } else {
-        tagCopy.length === 2 && tagCopy.pop()
-        tagCopy.push(name)
-        newTags = tagCopy
-      }
-
-      return {
-        ...oldFormData,
-        tags: newTags
-      }
-    })
-  }
-
-  const tagElements = genreAndNameList.map((hold: [string, string], i) => {
-    const [genre, name] = hold
-
-    const shouldHighlight = formData.tags.find((gen) => gen === genre)
-
-    return <Tag
-      key={i}
-      genre={genre}
-      name={name}
-      style={shouldHighlight ? "selected" : "select"}
-      updateTag={updateTag}
-    />
-  })
-
   return (
     <div className="createpost--container">
       <h1 className='createpost--title'>Create Post</h1>
@@ -192,7 +145,11 @@ export default function CreatePost() {
 
         <div className='createpost--form-tags'>
           <h5>Tags:</h5>
-          {tagElements}
+          <Tags
+            style=""
+            tags={allTags.tags}
+            updateTag={setAllTags}
+          />
         </div>
 
         <ul>
