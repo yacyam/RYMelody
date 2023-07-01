@@ -28,7 +28,7 @@ async function authorizeRegisterForm(
   const emailExists = await User.findOne({ email })
 
   if (emailExists) {
-    return [{ message: "Email Already Registered, Try Logging In." }]
+    return [{ message: "Email Already Registered, Try Logging In" }]
   }
 
   if (usernameExists) {
