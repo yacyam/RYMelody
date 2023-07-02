@@ -74,7 +74,7 @@ function authorizePostForm(
 ): { message: string }[] {
 
   const errors: { message: string }[] = []
-  if (userId === 0) {
+  if (userId <= 0) {
     return [{ message: 'Must Be Signed In To Create Post' }]
   }
 
@@ -83,7 +83,7 @@ function authorizePostForm(
   }
 
   if (title.length < 5 || title.length > 60) {
-    errors.push({ message: 'Title Must Be 5 - 60 Characters Long ' })
+    errors.push({ message: 'Title Must Be 5 - 60 Characters Long' })
   }
 
   if (desc.length < 5 || desc.length > 800) {
