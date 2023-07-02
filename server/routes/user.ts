@@ -5,6 +5,9 @@ import * as Profile from '../controllers/profile'
 import { authorizeUpdateProfile } from '../utils/formAuth'
 const router = Router()
 
+const CONTACT_TEXT_LENGTH = 50
+const BIO_TEXT_LENGTH = 800
+
 /**
  * Updates portion of profile with new information
  * @param req Request received by router
@@ -58,11 +61,15 @@ router.get('/:id', async (req, res) => {
 })
 
 router.put('/:id/updateContact', async (req, res) => {
-  await updateProfilePortion(req, res, 50, Profile.updateContact)
+  await updateProfilePortion(req, res, CONTACT_TEXT_LENGTH, Profile.updateContact)
 })
 
 router.put('/:id/updateBio', async (req, res) => {
-  await updateProfilePortion(req, res, 800, Profile.updateBio)
+  await updateProfilePortion(req, res, BIO_TEXT_LENGTH, Profile.updateBio)
 })
 
 export default router
+
+export {
+  updateProfilePortion
+}

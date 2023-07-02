@@ -206,7 +206,7 @@ async function authorizeUpdateProfile(
   if (errors.length > 0) return errors
 
   if (text.length > textLength) {
-    return [{ message: 'Contact Length Must be 5 - 50 Characters Long' }]
+    return [{ message: `Inputted Text Length Must Be At Most ${textLength} Characters` }]
   }
 
   return []

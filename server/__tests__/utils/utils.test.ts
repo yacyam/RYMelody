@@ -60,10 +60,10 @@ describe('inside of form auth', () => {
       jest.spyOn(Auth, 'authorizeRegisterForm')
 
       const res = [
-        ['', 'example@gmail.com', 'abcdefgh', 'abcdefgh'],
-        ['abc', '', 'abcdefgh', 'abcdefgh'],
-        ['abc', 'example@gmail.com', '', 'abcdefgh'],
-        ['abc', 'example@gmail.com', 'abcdefgh', '']
+        ["", EMAIL, PASS, CONF],
+        [USERNAME, "", PASS, CONF],
+        [USERNAME, EMAIL, "", CONF],
+        [USERNAME, EMAIL, PASS, ""],
       ]
         .map(async ([username, email, password, confirm]) => {
           const errors =
@@ -361,5 +361,44 @@ describe('inside of form auth', () => {
 
   })
 
+  describe('when authorizing update profile', () => {
+    it('should fail if the user does not exist', async () => {
+      (UserController.findById as jest.Mock).mockReturnValue(undefined)
 
+      const errors = await Auth.authorizeUpdateProfile("1", 1, "", 1)
+
+      expect(errors.length).toEqual(1)
+      expect(errors[0].message).toEqual('This User Profile Does Not Exist')
+      expect(UserController.findById).toBeCalledTimes(1)
+    })
+
+    it('should fail if the user id does not equal session id', async () => {
+      (UserController.findById as jest.Mock).mockReturnValue(fakeUser)
+
+      const errors = await Auth.authorizeUpdateProfile("1", 2, "", 1)
+
+      expect(errors.length).toEqual(1)
+      expect(errors[0].message).toEqual('Must Be Signed In As User to Update Profile')
+      expect(UserController.findById).toBeCalledTimes(1)
+    })
+
+    it('should fail if the text length is larger than desired length', async () => {
+      (UserController.findById as jest.Mock).mockReturnValue(fakeUser)
+
+      const errors = await Auth.authorizeUpdateProfile("1", 1, "abc", 2)
+
+      expect(errors.length).toEqual(1)
+      expect(errors[0].message).toEqual('Inputted Text Length Must Be At Most 2 Characters')
+      expect(UserController.findById).toBeCalledTimes(1)
+    })
+
+    it('should pass if all fields are in desired range', async () => {
+      (UserController.findById as jest.Mock).mockReturnValue(fakeUser)
+
+      const errors = await Auth.authorizeUpdateProfile("1", 1, generateRandomStrings(1, 50, 1)[0], 51)
+
+      expect(errors.length).toEqual(0)
+      expect(UserController.findById).toBeCalledTimes(1)
+    })
+  })
 })
