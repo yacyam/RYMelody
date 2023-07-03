@@ -7,7 +7,7 @@ const router = Router()
 
 router.get('/login_failure', (req, res) => {
   console.log('failed')
-  res.sendStatus(400)
+  res.sendStatus(401)
 })
 
 router.post('/login',
