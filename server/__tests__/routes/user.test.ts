@@ -3,7 +3,7 @@ jest.mock('../../controllers/user')
 import { Request, Response } from 'express'
 import { jest, expect, describe, it } from '@jest/globals'
 import { Profile } from '../../database/Profile';
-import makeApp from "../../utils/createApp";
+import { makeApp } from "../../utils/createApp";
 import request from 'supertest'
 import * as UserController from '../../controllers/user'
 import * as ProfileController from '../../controllers/profile'
