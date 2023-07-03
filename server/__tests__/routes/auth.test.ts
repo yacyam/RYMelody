@@ -1,4 +1,5 @@
 jest.mock('../../controllers/user')
+jest.mock('../../utils/formAuth')
 jest.mock('../../utils/hash')
 
 import { jest, expect, describe, it, beforeAll } from '@jest/globals'
@@ -6,6 +7,7 @@ import { makeAppSession } from "../../utils/createApp";
 import { Express } from 'express';
 import * as UserController from '../../controllers/user'
 import * as Encrypt from '../../utils/hash'
+import * as Auth from '../../utils/formAuth'
 import request from 'supertest'
 
 const fakeUser = {
@@ -14,6 +16,11 @@ const fakeUser = {
   email: 'abcdefgh',
   password: 'AKSOMCOXPZMCOPNEIOPNIOWPENFOEMKKNFCZNKWP'
 }
+
+const USERNAME = 'abcde'
+const EMAIL = 'example@gmail.com'
+const PASS = 'abcdefgh'
+const CONF = 'abcdefgh'
 
 const app: Express = makeAppSession()
 let user: request.SuperAgentTest
@@ -83,6 +90,66 @@ describe('inside of auth endpoint', () => {
 
       expect(res.status).toEqual(200)
       expect(res.body).toEqual(fakeUser)
+    })
+
+    it('should logout properly after a successful login', async () => {
+      (UserController.findById as jest.Mock).mockReturnValue(fakeUser);
+
+      const res = await user.post('/auth/logout')
+
+      expect(res.status).toEqual(200)
+      expect(UserController.findById).toBeCalledTimes(1)
+    })
+
+    it('should not have a user object property once logged out', async () => {
+      const res = await user.get('/auth/authenticate')
+
+      expect(res.status).toEqual(401)
+    })
+  })
+
+  describe('when registering a user', () => {
+    it('should fail if the form authorizes improperly', async () => {
+      (Auth.authorizeRegisterForm as jest.Mock).mockReturnValue([{ message: 'Some Form Component Is Incorrect' }])
+
+      const res = await request(app).post('/auth/register')
+
+      expect(res.status).toEqual(400)
+      expect(res.body).toEqual([{ message: 'Some Form Component Is Incorrect' }])
+      expect(Auth.authorizeRegisterForm).toBeCalledTimes(1)
+      expect(Auth.authorizeRegisterForm).toBeCalledWith(undefined, undefined, undefined, undefined)
+    })
+
+    it('should fail if creating a user fails', async () => {
+      (UserController.createUser as jest.Mock).mockImplementation(() => {
+        throw new Error('User Could Not Be Created')
+      });
+      (Auth.authorizeRegisterForm as jest.Mock).mockReturnValue([])
+
+      const res = await request(app).post('/auth/register')
+
+      expect(res.status).toEqual(500)
+      expect(Auth.authorizeRegisterForm).toBeCalledTimes(1)
+      expect(UserController.createUser).toBeCalledTimes(1)
+    })
+
+    it('should pass if user is created successfully', async () => {
+      const regForm = {
+        username: USERNAME,
+        email: EMAIL,
+        password: PASS,
+        confirmPassword: CONF
+      };
+
+      (UserController.createUser as jest.Mock).mockImplementation(() => { return });
+      (Auth.authorizeRegisterForm as jest.Mock).mockReturnValue([])
+
+      const res = await request(app).post('/auth/register').send(regForm)
+
+      expect(res.status).toEqual(200)
+      expect(Auth.authorizeRegisterForm).toBeCalledTimes(1)
+      expect(Auth.authorizeRegisterForm).toBeCalledWith(USERNAME, EMAIL, PASS, CONF)
+      expect(UserController.createUser).toBeCalledTimes(1)
     })
   })
 })
