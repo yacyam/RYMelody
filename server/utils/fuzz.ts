@@ -33,6 +33,24 @@ function generateRandomStrings(
   return allStrings
 }
 
+/**
+ * Generates a function which errors out or returns inputted value with equal
+ * likelihood
+ * @param value The value wished to be returned
+ * @returns Function with desired value or error
+ */
+function returnsOrThrows(value: any): (() => void) | (() => any) {
+  const chance = Math.random()
+
+  if (chance < .5) {
+    return () => {
+      throw new Error('Failed');
+    }
+  }
+  return () => { return value }
+}
+
 export {
-  generateRandomStrings
+  generateRandomStrings,
+  returnsOrThrows
 }
