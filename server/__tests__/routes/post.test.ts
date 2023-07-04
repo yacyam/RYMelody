@@ -26,6 +26,7 @@ const fakeUser = {
 }
 
 beforeAll(async () => {
+  (UserController.findById as jest.Mock).mockReturnValue(fakeUser);
   user = request.agent(server);
 
   (UserController.findOne as jest.Mock).mockReturnValue(fakeUser);
@@ -116,7 +117,6 @@ describe('inside of post endpoint', () => {
 
 
     it('should pass with canModify if user who posted is logged into session', async () => {
-      (UserController.findById as jest.Mock).mockReturnValue(fakeUser);
       createPostIdMock();
       (PostController.userLikedPost as jest.Mock).mockReturnValue(true)
 
@@ -138,7 +138,7 @@ describe('inside of post endpoint', () => {
         ...fakeUser,
         id: 15
       };
-      (UserController.findById as jest.Mock).mockReturnValue(newUser);
+      (UserController.findById as jest.Mock).mockReturnValueOnce(newUser);
       createPostIdMock();
       (PostController.userLikedPost as jest.Mock).mockReturnValue(true)
 
@@ -189,7 +189,6 @@ describe('inside of post endpoint', () => {
     })
 
     it('should fail if user is signed in and some aspect of the post is missing', async () => {
-      (UserController.findById as jest.Mock).mockReturnValue(fakeUser);
       const newPost = {
         ...fakePost,
         description: '',
@@ -203,7 +202,6 @@ describe('inside of post endpoint', () => {
     })
 
     it('should fail if form passes but creating post fails', async () => {
-      (UserController.findById as jest.Mock).mockReturnValue(fakeUser);
       (PostController.createPost as jest.Mock).mockImplementation(() => { throw new Error() })
 
       const res = await user.post('/post/create').send(
@@ -217,7 +215,6 @@ describe('inside of post endpoint', () => {
     })
 
     it('should fail if creating tags fails', async () => {
-      (UserController.findById as jest.Mock).mockReturnValue(fakeUser);
       (PostController.createPost as jest.Mock).mockReturnValue(fakePost.id);
       (PostController.createTags as jest.Mock).mockImplementation(() => { throw new Error() })
 
@@ -234,7 +231,6 @@ describe('inside of post endpoint', () => {
     })
 
     it('should pass if all fields are inputted correctly', async () => {
-      (UserController.findById as jest.Mock).mockReturnValue(fakeUser);
       (PostController.createPost as jest.Mock).mockReturnValue(fakePost.id);
       (PostController.createTags as jest.Mock).mockImplementation(() => { return })
 
@@ -262,7 +258,6 @@ describe('inside of post endpoint', () => {
 
     it('should fail if the comment form from user does not authorize correctly', async () => {
       jest.spyOn(Auth, 'authorizeCommentForm');
-      (UserController.findById as jest.Mock).mockReturnValue(fakeUser);
       (Auth.authorizeCommentForm as jest.Mock).mockReturnValue([{ message: 'This Post Does Not Exist' }])
 
       const res = await user.post('/post/comment').send({ postId: "0", comment: '' })
@@ -275,7 +270,6 @@ describe('inside of post endpoint', () => {
 
     it('should fail if post controller fails to create comment', async () => {
       jest.spyOn(Auth, 'authorizeCommentForm');
-      (UserController.findById as jest.Mock).mockReturnValue(fakeUser);
       (Auth.authorizeCommentForm as jest.Mock).mockReturnValue([]);
       (PostController.createComment as jest.Mock).mockImplementation(() => { throw new Error() })
 
@@ -290,7 +284,6 @@ describe('inside of post endpoint', () => {
 
     it('should pass if all fields are inputted correctly', async () => {
       jest.spyOn(Auth, 'authorizeCommentForm');
-      (UserController.findById as jest.Mock).mockReturnValue(fakeUser);
       (Auth.authorizeCommentForm as jest.Mock).mockReturnValue([]);
       (PostController.createComment as jest.Mock).mockReturnValue(50)
 
@@ -317,7 +310,6 @@ describe('inside of post endpoint', () => {
     })
 
     it('should fail if the post controller fails to return', async () => {
-      (UserController.findById as jest.Mock).mockReturnValue(fakeUser);
       (PostController.userLikedPost as jest.Mock).mockImplementation(() => { throw new Error() })
 
       const res = await user.post('/post/1/like')
@@ -328,7 +320,6 @@ describe('inside of post endpoint', () => {
     })
 
     it('should fail if user liked post but unliking post fails', async () => {
-      (UserController.findById as jest.Mock).mockReturnValue(fakeUser);
       (PostController.userLikedPost as jest.Mock).mockReturnValue(true);
       (PostController.unlikePost as jest.Mock).mockImplementation(() => { throw new Error() })
 
@@ -342,7 +333,6 @@ describe('inside of post endpoint', () => {
     })
 
     it('should fail if user didnt like post but liking fails', async () => {
-      (UserController.findById as jest.Mock).mockReturnValue(fakeUser);
       (PostController.userLikedPost as jest.Mock).mockReturnValue(false);
       (PostController.likePost as jest.Mock).mockImplementation(() => { throw new Error() })
 
@@ -356,7 +346,6 @@ describe('inside of post endpoint', () => {
     })
 
     it('should pass if user didnt previously like post and wants to like it', async () => {
-      (UserController.findById as jest.Mock).mockReturnValue(fakeUser);
       (PostController.userLikedPost as jest.Mock).mockReturnValue(false);
       (PostController.likePost as jest.Mock).mockImplementation(() => { return })
 
@@ -372,7 +361,6 @@ describe('inside of post endpoint', () => {
     })
 
     it('should pass if user previously liked post and wants to unlike it', async () => {
-      (UserController.findById as jest.Mock).mockReturnValue(fakeUser);
       (PostController.userLikedPost as jest.Mock).mockReturnValue(true);
       (PostController.unlikePost as jest.Mock).mockImplementation(() => { return })
 
@@ -388,9 +376,125 @@ describe('inside of post endpoint', () => {
     })
   })
 
-  // describe('when updaing a specific post', () => {
-  //   it('should fail if the user is not logged in', async () => {
+  describe('when updaing a specific post', () => {
+    it('should fail if the user is not logged in', async () => {
 
-  //   })
-  // })
+      const res = await request(app).put('/post/1/update')
+
+      expect(res.status).toEqual(401)
+      expect(res.body).toEqual([{ message: 'Only Original Poster Can Edit This Post' }])
+    })
+
+    jest.spyOn(Auth, 'authorizeUpdateForm');
+
+    it('should fail if authorization throws error', async () => {
+      (Auth.authorizeUpdateForm as jest.Mock).mockImplementationOnce(() => { throw new Error() })
+
+      const res = await user.put('/post/23/update').send({ text: 'abcde' })
+
+      expect(res.status).toEqual(500)
+      expect(Auth.authorizeUpdateForm).toBeCalledTimes(1)
+      expect(Auth.authorizeUpdateForm).toBeCalledWith(fakeUser.id, "23", "abcde")
+    })
+
+    it('should fail if authorization does not pass', async () => {
+      (Auth.authorizeUpdateForm as jest.Mock).mockReturnValueOnce([{ message: 'This form failed to pass' }])
+
+      const res = await user.put('/post/42/update').send({ text: 'abcdefgh' })
+
+      expect(res.status).toEqual(400)
+      expect(res.body).toEqual([{ message: 'This form failed to pass' }])
+      expect(Auth.authorizeUpdateForm).toBeCalledTimes(1)
+      expect(Auth.authorizeUpdateForm).toBeCalledWith(fakeUser.id, "42", "abcdefgh")
+    })
+
+    it('should fail if post controller fails to update', async () => {
+      (Auth.authorizeUpdateForm as jest.Mock).mockReturnValueOnce([]);
+      (PostController.updateDescription as jest.Mock).mockImplementationOnce(() => { throw new Error() })
+
+      const res = await user.put('/post/32/update').send({ text: 'abcdef' })
+
+      expect(res.status).toEqual(500)
+      expect(Auth.authorizeUpdateForm).toBeCalledTimes(1)
+      expect(Auth.authorizeUpdateForm).toBeCalledWith(fakeUser.id, "32", "abcdef")
+      expect(PostController.updateDescription).toBeCalledTimes(1)
+      expect(PostController.updateDescription).toBeCalledWith("32", "abcdef")
+    })
+
+    it('should pass if all fields are inputted correctly', async () => {
+      (Auth.authorizeUpdateForm as jest.Mock).mockReturnValueOnce([]);
+      (PostController.updateDescription as jest.Mock).mockImplementationOnce(() => { return })
+
+      const res = await user.put("/post/12/update").send({ text: 'abcdefghi' })
+
+      expect(res.status).toEqual(200)
+      expect(Auth.authorizeUpdateForm).toBeCalledTimes(1)
+      expect(Auth.authorizeUpdateForm).toBeCalledWith(fakeUser.id, "12", "abcdefghi")
+      expect(PostController.updateDescription).toBeCalledTimes(1)
+      expect(PostController.updateDescription).toBeCalledWith("12", "abcdefghi")
+    })
+  })
+
+  describe('when deleting a post', () => {
+    it('should fail if user is not logged in', async () => {
+      const res = await request(app).delete('/post/4')
+
+      expect(res.status).toEqual(401)
+      expect(res.body).toEqual([{ message: 'Only Original Poster Can Edit This Post' }])
+    })
+
+    it('should fail if finding the post throws an error', async () => {
+      (PostController.findById as jest.Mock).mockImplementationOnce(() => { throw new Error() })
+      const res = await user.delete('/post/4')
+
+      expect(res.status).toEqual(500)
+      expect(PostController.findById).toBeCalledTimes(1)
+    })
+
+    it('should fail if the post does not exist', async () => {
+      (PostController.findById as jest.Mock).mockReturnValueOnce(undefined)
+
+      const res = await user.delete('/post/5')
+
+      expect(res.status).toEqual(404)
+      expect(PostController.findById).toBeCalledTimes(1)
+      expect(PostController.findById).toBeCalledWith("5")
+    })
+
+    it('should fail if the user logged in is not the same as user who posted', async () => {
+      const newUser = {
+        ...fakeUser,
+        id: 25
+      };
+      (UserController.findById as jest.Mock).mockReturnValueOnce(newUser);
+      (PostController.findById as jest.Mock).mockReturnValue(fakePost)
+
+      const res = await user.delete('/post/10')
+
+      expect(res.status).toEqual(401)
+      expect(res.body).toEqual([{ message: 'Only Original Poster Can Delete This Post' }])
+      expect(PostController.findById).toBeCalledTimes(1)
+      expect(PostController.findById).toBeCalledWith("10")
+    })
+
+    it('should fail if post controller fails to delete post', async () => {
+      (PostController.deletePost as jest.Mock).mockImplementationOnce(() => { throw new Error() })
+      const res = await user.delete('/post/15')
+
+      expect(res.status).toEqual(500)
+      expect(PostController.findById).toBeCalledTimes(1)
+      expect(PostController.deletePost).toBeCalledTimes(1)
+      expect(PostController.deletePost).toBeCalledWith("15")
+    })
+
+    it('should pass if all fields are inputted correctly', async () => {
+      (PostController.deletePost as jest.Mock).mockImplementationOnce(() => { return })
+      const res = await user.delete('/post/20')
+
+      expect(res.status).toEqual(200)
+      expect(PostController.findById).toBeCalledTimes(1)
+      expect(PostController.deletePost).toBeCalledTimes(1)
+      expect(PostController.deletePost).toBeCalledWith("20")
+    })
+  })
 })
