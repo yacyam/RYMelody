@@ -22,6 +22,10 @@ export interface Comment {
   comment: string
 }
 
+export interface ModifyComment extends Comment {
+  canMofidy: boolean
+}
+
 export interface Tags {
   electronic: boolean,
   hiphop: boolean,

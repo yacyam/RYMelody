@@ -13,7 +13,7 @@
 }
 
 .post--main-container {
-  min-height: 140px;
+  min-height: 250px;
   padding-bottom: 50px;
   display: flex;
   flex-direction: column;

@@ -234,7 +234,8 @@ export default function Post() {
           id: id,
           userid: userId,
           username: username,
-          comment: formData.comment
+          comment: formData.comment,
+          canModify: true
         })
         return {
           ...oldPostData,

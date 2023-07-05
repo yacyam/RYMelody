@@ -2,7 +2,34 @@ import { Router } from "express";
 import { authorizeCommentForm, authorizePostForm, authorizeUpdateForm } from "../utils/formAuth";
 import { User } from "../database/User";
 import * as Post from "../controllers/post"
+import { Comment, ModifyComment } from "../database/Post";
 const router = Router()
+
+/**
+ * Updates each comment to see if current user logged in can edit/delete it.
+ * @param comments Obtained comments from post
+ * @param userId The id of the user in session
+ * @returns Original comments with whether the current user in session can
+ * modify it
+ */
+function checkIfModifiable(
+  comments: Comment[],
+  userId: number | undefined
+): ModifyComment[] {
+
+  const checkModify: ModifyComment[] = comments.map((comment) => {
+    const isModifiable = comment.userid === userId
+
+    const modifiedComment: ModifyComment = {
+      ...comment,
+      canMofidy: isModifiable
+    }
+
+    return modifiedComment
+  });
+
+  return checkModify
+}
 
 router.post('/create', async (req, res) => {
   let userId = 0
@@ -51,6 +78,7 @@ router.get('/all', async (req, res) => {
 })
 
 router.get('/:id', async (req, res) => {
+  let userId: number | undefined = undefined;
   const postId = req.params.id
   try {
     const post = await Post.findById(postId)
@@ -63,14 +91,16 @@ router.get('/:id', async (req, res) => {
     let isLikedByUser = false
     let canModify = false
     if ('user' in req) {
-      const userId = (req.user as User).id
+      userId = (req.user as User).id
       isLikedByUser = await Post.userLikedPost(postId, userId)
       canModify = post.userid === userId
     }
 
+    const allCommentsModCheck = checkIfModifiable(allComments, userId)
+
     res.status(200).send({
       ...post,
-      comments: allComments,
+      comments: allCommentsModCheck,
       tags: allTags,
       amountLikes: allLikes,
       isPostLiked: isLikedByUser,

@@ -2,6 +2,7 @@ import { Comment } from "../interfaces/Post";
 import "../styles/components/PostComment.css"
 
 export default function PostComment(props: Comment) {
+  console.log(props)
 
   function gotoUserProfile(e: React.SyntheticEvent) {
     window.open(`http://localhost:5173/user/${props.userid}`, '_self')

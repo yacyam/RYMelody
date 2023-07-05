@@ -2,7 +2,8 @@ export interface Comment {
   id: number,
   userid: number,
   username: string,
-  comment: string
+  comment: string,
+  canModify: boolean
 }
 
 export interface Tags extends Record<string, boolean> {
