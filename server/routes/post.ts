@@ -14,7 +14,7 @@ const router = Router()
  */
 function checkIfModifiable(
   comments: Comment[],
-  userId: number | undefined
+  userId?: number
 ): ModifyComment[] {
 
   const checkModify: ModifyComment[] = comments.map((comment) => {
@@ -220,7 +220,7 @@ router.delete('/:id', async (req, res) => {
 
 router.delete('/:id/comment', async (req, res) => {
   if (!('user' in req)) {
-    return res.status(401).send([{ message: 'Only Original Commenter Can Edit Comment' }])
+    return res.status(401).send([{ message: 'Only Original Commenter Can Delete Comment' }])
   }
   const userId = (req.user as User).id
   const postId = req.params.id
@@ -228,13 +228,13 @@ router.delete('/:id/comment', async (req, res) => {
   try {
     const comment = await Post.findCommentById(commentId)
     if (!comment) {
-      return res.status(401).send([{ message: 'Comment Does Not Exist' }])
+      return res.status(400).send([{ message: 'Comment Does Not Exist' }])
     }
     if (userId !== comment.userid) {
       return res.status(401).send([{ message: 'Only Original Commenter Can Delete Comment' }])
     }
     if (postId !== `${comment.postid}`) {
-      return res.status(401).send([{ message: 'Deleting Comment From Another Post' }])
+      return res.status(400).send([{ message: 'Deleting Comment From Another Post' }])
     }
     await Post.deleteComment(commentId)
     res.sendStatus(200)
@@ -243,5 +243,9 @@ router.delete('/:id/comment', async (req, res) => {
   }
 
 })
+
+export {
+  checkIfModifiable
+}
 
 export default router
