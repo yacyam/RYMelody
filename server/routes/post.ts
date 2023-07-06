@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { authorizeCommentForm, authorizePostForm, authorizeUpdateForm } from "../utils/formAuth";
+import { authorizeCommentForm, authorizePostForm, authorizeUpdateComment, authorizeUpdateForm } from "../utils/formAuth";
 import { User } from "../database/User";
 import * as Post from "../controllers/post"
 import { Comment, ModifyComment } from "../database/Post";
@@ -22,7 +22,7 @@ function checkIfModifiable(
 
     const modifiedComment: ModifyComment = {
       ...comment,
-      canMofidy: isModifiable
+      canModify: isModifiable
     }
 
     return modifiedComment
@@ -85,7 +85,7 @@ router.get('/:id', async (req, res) => {
     if (!post) {
       return res.sendStatus(404)
     }
-    const allComments = await Post.findCommentsById(postId)
+    const allComments = await Post.getComments(postId)
     const allLikes = await Post.getAllLikes(postId)
     const allTags = await Post.getTags(postId)
     let isLikedByUser = false
@@ -107,16 +107,18 @@ router.get('/:id', async (req, res) => {
       canModify: canModify
     })
   } catch (err) {
+    console.log(err)
     res.sendStatus(500)
   }
 })
 
-router.post('/comment', async (req, res) => {
+router.post('/:id/comment', async (req, res) => {
   if (!('user' in req)) {
     return res.status(401).send([{ message: 'Must Be Logged In To Comment' }])
   }
   const userId = (req.user as User).id
-  const { postId, comment } = req.body
+  const postId = req.params.id
+  const { comment } = req.body
   const errors = await authorizeCommentForm(postId, comment)
   if (errors.length > 0) {
     res.status(400).send(errors)
@@ -130,6 +132,29 @@ router.post('/comment', async (req, res) => {
       res.sendStatus(500)
     }
   }
+})
+
+router.put('/:id/comment', async (req, res) => {
+  if (!('user' in req)) {
+    return res.status(401).send([{ message: 'Must Be Logged In To Edit Comment' }])
+  }
+  const commentId = req.body.id
+  const { userId, comment } = req.body
+  const postId = req.params.id
+  const sessionUserId = (req.user as User).id
+
+  try {
+    const errors = await authorizeUpdateComment(userId, sessionUserId, commentId, postId, comment)
+
+    if (errors.length > 0) {
+      return res.status(400).send(errors)
+    }
+    await Post.updateComment(commentId, comment)
+    res.sendStatus(200)
+  } catch (err) {
+    res.sendStatus(500)
+  }
+
 })
 
 router.post('/:id/like', async (req, res) => {
@@ -191,6 +216,32 @@ router.delete('/:id', async (req, res) => {
   } catch (err) {
     res.sendStatus(500)
   }
+})
+
+router.delete('/:id/comment', async (req, res) => {
+  if (!('user' in req)) {
+    return res.status(401).send([{ message: 'Only Original Commenter Can Edit Comment' }])
+  }
+  const userId = (req.user as User).id
+  const postId = req.params.id
+  const commentId = req.body.id
+  try {
+    const comment = await Post.findCommentById(commentId)
+    if (!comment) {
+      return res.status(401).send([{ message: 'Comment Does Not Exist' }])
+    }
+    if (userId !== comment.userid) {
+      return res.status(401).send([{ message: 'Only Original Commenter Can Delete Comment' }])
+    }
+    if (postId !== `${comment.postid}`) {
+      return res.status(401).send([{ message: 'Deleting Comment From Another Post' }])
+    }
+    await Post.deleteComment(commentId)
+    res.sendStatus(200)
+  } catch (err) {
+    res.sendStatus(500)
+  }
+
 })
 
 export default router

@@ -1,5 +1,6 @@
 .comment--container {
-  height: 70px;
+
+  max-height: 100%;
   display: flex;
   flex-direction: column;
   gap: 5px;
@@ -15,4 +16,14 @@
 
 .comment--main-text {
   margin-left: 10px;
+}
+
+.comment--edit {
+  display: flex;
+  gap: 8px;
+}
+
+.comment--edit p {
+  color: gray;
+  cursor: pointer;
 }

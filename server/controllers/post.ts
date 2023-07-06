@@ -1,6 +1,6 @@
 import { pool } from "../database/index"
 import * as Query from "../database/queries"
-import { HomePost, Post, Comment, Tags } from "../database/Post"
+import { HomePost, Post, Comment, Tags, RawComment } from "../database/Post"
 import { QueryResult } from "pg"
 
 /**
@@ -34,9 +34,8 @@ async function createComment(
   userId: number,
   comment: string
 ): Promise<void> {
-  await pool.query(Query.createComment, [postId, userId, comment])
-  const newId = await pool.query(Query.getCommentId, [postId, userId])
-  return newId.rows[0]
+  const newId = await pool.query(Query.createComment, [postId, userId, comment])
+  return newId.rows[0].id
 }
 
 /**
@@ -90,12 +89,12 @@ async function findById(id: string): Promise<Post | undefined> {
 }
 
 /**
- * Obtains all comments from the comment id
+ * Obtains all comments from the post id
  * @param id 
  * @returns All comments associated with the id
  */
-async function findCommentsById(id: string): Promise<Comment[]> {
-  const getComments: QueryResult = await pool.query(Query.findCommentsById, [id])
+async function getComments(id: string): Promise<Comment[]> {
+  const getComments: QueryResult = await pool.query(Query.getComments, [id])
   return getComments.rows
 }
 
@@ -191,6 +190,30 @@ async function getTags(postId: string): Promise<Tags> {
   return tags.rows[0]
 }
 
+async function findCommentById(
+  id: string | number,
+): Promise<RawComment | undefined> {
+  const comment: QueryResult = await pool.query(Query.findCommentById, [id])
+  if (comment.rows.length === 0) {
+    return undefined
+  }
+  return comment.rows[0]
+}
+
+async function updateComment(
+  id: string | number,
+  comment: string
+): Promise<void> {
+  await pool.query(Query.updateComment, [comment, id])
+
+}
+
+async function deleteComment(
+  id: string | number
+): Promise<void> {
+  await pool.query(Query.deleteComment, [id])
+}
+
 export {
   getPosts,
   getAllLikes,
@@ -198,12 +221,15 @@ export {
   createPost,
   createTags,
   findById,
-  findCommentsById,
+  findCommentById,
+  getComments,
   userLikedPost,
   createComment,
   likePost,
   unlikePost,
   updateDescription,
-  deletePost
+  updateComment,
+  deletePost,
+  deleteComment
 }
 

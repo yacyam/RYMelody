@@ -9,10 +9,7 @@ import { Edit } from "../components/Edit"
 export default function Post() {
   const { id } = useParams()
   const { isLoggedIn } = useContext(AuthContext)
-  const [formData, setFormData] = useState({
-    postId: id,
-    comment: ""
-  })
+  const [formData, setFormData] = useState({ comment: "" })
   const [errors, setErrors] = useState<{ message: string }[]>([])
   const [doesNotExist, setDoesNotExist] = useState<boolean>(false)
   const [editDescErrors, setEditDescErrors] = useState<{ message: string }[]>([])
@@ -190,6 +187,8 @@ export default function Post() {
       return <PostComment
         key={comment.id}
         {...comment}
+        updatePost={setFullPostData}
+        postId={id}
       />
     })
   }
@@ -207,7 +206,7 @@ export default function Post() {
   async function submitForm(e: React.SyntheticEvent): Promise<void> {
     e.preventDefault()
 
-    const res = await fetch('http://localhost:3000/post/comment', {
+    const res = await fetch(`http://localhost:3000/post/${id}/comment`, {
       method: 'POST',
       'credentials': 'include',
       body: JSON.stringify(formData),
@@ -265,7 +264,7 @@ export default function Post() {
               </h5>
               :
               <form className="post--comment-form" onSubmit={submitForm}>
-                <legend>Create a Comment on this Post</legend>
+                <legend>Leave a Comment on this Post</legend>
                 <textarea
                   name="comment"
                   className="post--comment-box"

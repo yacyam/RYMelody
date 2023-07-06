@@ -250,7 +250,7 @@ describe('inside of post endpoint', () => {
   describe('when creating a comment', () => {
     it('should fail if user is not logged in', async () => {
 
-      const res = await request(app).post('/post/comment')
+      const res = await request(app).post('/post/1/comment')
 
       expect(res.status).toEqual(401)
       expect(res.body).toEqual([{ message: 'Must Be Logged In To Comment' }])
@@ -260,7 +260,7 @@ describe('inside of post endpoint', () => {
       jest.spyOn(Auth, 'authorizeCommentForm');
       (Auth.authorizeCommentForm as jest.Mock).mockReturnValue([{ message: 'This Post Does Not Exist' }])
 
-      const res = await user.post('/post/comment').send({ postId: "0", comment: '' })
+      const res = await user.post('/post/0/comment').send({ comment: '' })
 
       expect(res.status).toEqual(400)
       expect(res.body).toEqual([{ message: 'This Post Does Not Exist' }])
@@ -273,7 +273,7 @@ describe('inside of post endpoint', () => {
       (Auth.authorizeCommentForm as jest.Mock).mockReturnValue([]);
       (PostController.createComment as jest.Mock).mockImplementation(() => { throw new Error() })
 
-      const res = await user.post('/post/comment').send({ postId: "1", comment: 'comment' })
+      const res = await user.post('/post/1/comment').send({ comment: 'comment' })
 
       expect(res.status).toEqual(500)
       expect(Auth.authorizeCommentForm).toBeCalledTimes(1)
@@ -287,7 +287,7 @@ describe('inside of post endpoint', () => {
       (Auth.authorizeCommentForm as jest.Mock).mockReturnValue([]);
       (PostController.createComment as jest.Mock).mockReturnValue(50)
 
-      const res = await user.post('/post/comment').send({ postId: "1", comment: 'comment' })
+      const res = await user.post('/post/1/comment').send({ comment: 'comment' })
 
       expect(res.status).toEqual(200)
       expect(res.body).toEqual({

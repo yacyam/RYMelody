@@ -15,6 +15,13 @@ export interface HomePost {
   description: string
 }
 
+export interface RawComment {
+  id: number,
+  userid: number,
+  postid: number,
+  comment: string
+}
+
 export interface Comment {
   id: number,
   userid: number,
@@ -23,7 +30,7 @@ export interface Comment {
 }
 
 export interface ModifyComment extends Comment {
-  canMofidy: boolean
+  canModify: boolean
 }
 
 export interface Tags {

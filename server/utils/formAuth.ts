@@ -1,8 +1,10 @@
 import * as User from "../controllers/user"
 import * as Post from "../controllers/post"
-import { Tags } from "../database/Post"
+import { RawComment, Tags } from "../database/Post"
 const emailCheck = /^(?=.{1,254}$)(?=.{1,64}@)[-!#$%&'*+/0-9=?A-Z^_`a-z{|}~]+(\.[-!#$%&'*+/0-9=?A-Z^_`a-z{|}~]+)*@[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?(\.[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*$/
 
+const MIN_COMMENT_LEN = 4
+const MAX_COMMENT_LEN = 400
 /**
  * Checks if all registration parameters are valid to create a user
  * @param username 
@@ -129,8 +131,8 @@ async function authorizeCommentForm(
   if (!post) {
     errors.push({ message: 'This Post Does Not Exist' })
   }
-  if (comment.length < 4 || comment.length > 400) {
-    errors.push({ message: 'Comment Must be 4 - 400 Characters Long' })
+  if (comment.length < MIN_COMMENT_LEN || comment.length > MAX_COMMENT_LEN) {
+    errors.push({ message: `Comment Must be ${MIN_COMMENT_LEN} - ${MAX_COMMENT_LEN} Characters Long` })
   }
 
   return errors
@@ -212,10 +214,45 @@ async function authorizeUpdateProfile(
   return []
 }
 
+async function authorizeUpdateComment(
+  userId: number,
+  sessionUserId: number,
+  commentId: number,
+  postId: string,
+  comment: string
+): Promise<{ message: string }[]> {
+  const errors: { message: string }[] = []
+
+  if (userId !== sessionUserId) {
+    return [{ message: 'Must Be Original Commenter To Edit Comment' }]
+  }
+
+  const fullComment = await Post.findCommentById(commentId)
+
+  if (!fullComment) {
+    return [{ message: 'Comment Does Not Exist' }]
+  }
+
+  if (`${fullComment.postid}` !== postId) {
+    errors.push({ message: 'Editing Comment Under Different Post' })
+  }
+
+  if (fullComment.userid !== userId) {
+    errors.push({ message: 'Original Commenter Is Not Same As User In Session' })
+  }
+
+  if (comment.length < MIN_COMMENT_LEN || comment.length > MAX_COMMENT_LEN) {
+    errors.push({ message: `Comment Must be ${MIN_COMMENT_LEN} - ${MAX_COMMENT_LEN} Characters Long` })
+  }
+
+  return errors
+}
+
 export {
   authorizeRegisterForm,
   authorizePostForm,
   authorizeCommentForm,
   authorizeUpdateForm,
-  authorizeUpdateProfile
+  authorizeUpdateProfile,
+  authorizeUpdateComment
 }
