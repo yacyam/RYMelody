@@ -47,6 +47,13 @@ const fakePost = {
   audio: "abcde"
 }
 
+const fakeRawComment = {
+  id: 1,
+  userid: fakeUser.id,
+  postid: fakePost.id,
+  comment: 'abcdefgh'
+}
+
 
 afterEach(() => {
   jest.clearAllMocks()
@@ -399,6 +406,72 @@ describe('inside of form auth', () => {
 
       expect(errors.length).toEqual(0)
       expect(UserController.findById).toBeCalledTimes(1)
+    })
+  })
+
+  describe('when authorizing comment update', () => {
+    it('should fail if user id of comment is different from session user id', async () => {
+
+      const errors = await Auth.authorizeUpdateComment(1, 2, 1, "1", "")
+
+      expect(errors.length).toBe(1)
+      expect(errors[0].message).toBe('Must Be Original Commenter To Edit Comment')
+    })
+
+    it('should fail if comment associated with id does not exist', async () => {
+      (PostController.findCommentById as jest.Mock).mockReturnValueOnce(undefined)
+      const errors = await Auth.authorizeUpdateComment(1, 1, 12345, "1", "")
+
+      expect(errors.length).toBe(1)
+      expect(errors[0].message).toBe('Comment Does Not Exist')
+    })
+
+    it('should fail if user id of comment from db is different from user logged in', async () => {
+      (PostController.findCommentById as jest.Mock).mockReturnValueOnce(fakeRawComment)
+      const errors = await Auth.authorizeUpdateComment(2, 2, 12345, `${fakePost.id}`, "abcdefg")
+
+      expect(errors.length).toBe(1)
+      expect(errors[0].message).toBe('Original Commenter Is Not Same As User In Session')
+    })
+
+    it('should fail if post attr with comment is not same as post id argument', async () => {
+      (PostController.findCommentById as jest.Mock).mockReturnValueOnce(fakeRawComment)
+
+      const errors = await Auth.authorizeUpdateComment(1, 1, 12345, `${fakePost.id + 1}`, "abcdefg")
+
+      expect(errors.length).toBe(1)
+      expect(errors[0].message).toBe('Editing Comment Under Different Post')
+    })
+
+    it('should fail if new comment length is not in specified range', async () => {
+      (PostController.findCommentById as jest.Mock).mockReturnValueOnce(fakeRawComment)
+
+      const errors = await Auth.authorizeUpdateComment(1, 1, 12345, `${fakePost.id}`, "ab")
+
+      expect(errors.length).toBe(1)
+      expect(errors[0].message).toBe('Comment Must be 4 - 400 Characters Long')
+    })
+
+    it('should have multiple errors if > 1 field is incorrect', async () => {
+      (PostController.findCommentById as jest.Mock).mockReturnValueOnce(fakeRawComment)
+
+      const errors = await Auth.authorizeUpdateComment(2, 2, 12345, `${fakePost.id + 1}`, "ab")
+
+      expect(errors.length).toBe(3)
+      expect(errors).toEqual([
+        { message: 'Original Commenter Is Not Same As User In Session' },
+        { message: 'Editing Comment Under Different Post' },
+        { message: 'Comment Must be 4 - 400 Characters Long' }
+      ])
+    })
+
+    it('should pass with no errors if all fields are correct', async () => {
+      (PostController.findCommentById as jest.Mock).mockReturnValueOnce(fakeRawComment)
+
+      const errors = await Auth.authorizeUpdateComment(1, 1, 2, `${fakePost.id}`, "abcdef")
+
+      expect(errors.length).toBe(0)
+      expect(PostController.findCommentById).toBeCalledTimes(1)
     })
   })
 })

@@ -214,6 +214,15 @@ async function authorizeUpdateProfile(
   return []
 }
 
+/**
+ * Checks whether all comment parameters are valid to update the comment
+ * @param userId Id of the user attributed with the comment
+ * @param sessionUserId Id of the user currently logged into session
+ * @param commentId 
+ * @param postId Id of post the comment is under
+ * @param comment New comment to update the old one
+ * @returns All the errors associated with the authorization
+ */
 async function authorizeUpdateComment(
   userId: number,
   sessionUserId: number,
@@ -233,12 +242,13 @@ async function authorizeUpdateComment(
     return [{ message: 'Comment Does Not Exist' }]
   }
 
-  if (`${fullComment.postid}` !== postId) {
-    errors.push({ message: 'Editing Comment Under Different Post' })
+  if (fullComment.userid !== userId) {
+    //This should never happen but just in case db and frontend go out of sync
+    errors.push({ message: 'Original Commenter Is Not Same As User In Session' })
   }
 
-  if (fullComment.userid !== userId) {
-    errors.push({ message: 'Original Commenter Is Not Same As User In Session' })
+  if (`${fullComment.postid}` !== postId) {
+    errors.push({ message: 'Editing Comment Under Different Post' })
   }
 
   if (comment.length < MIN_COMMENT_LEN || comment.length > MAX_COMMENT_LEN) {
