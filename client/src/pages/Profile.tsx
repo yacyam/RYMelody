@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { UserProfile } from "../interfaces/Profile";
 import MainProfile from "../components/MainProfile";
 import HomePost from "../components/HomePost";
+import { MsgErr } from "../interfaces/Error"
 
 export default function Profile() {
   const { id } = useParams()
@@ -11,8 +12,6 @@ export default function Profile() {
   const [amountShowPosts, setAmountShowPosts] = useState(3)
   const [amountShowLikes, setAmountShowLikes] = useState(3)
   const [doesNotExist, setDoesNotExist] = useState<boolean>(false)
-
-  //have to add errors to profile for user validation
 
   useEffect(() => {
     fetch(`http://localhost:3000/user/${id}`, {
@@ -27,7 +26,7 @@ export default function Profile() {
       .catch(() => setDoesNotExist(true))
   }, [])
 
-  async function updateContact(data: { text: string }): Promise<void> {
+  async function updateContact(data: { text: string }): Promise<MsgErr> {
     const res = await fetch(`http://localhost:3000/user/${id}/updateContact`, {
       method: 'PUT',
       'credentials': 'include',
@@ -46,10 +45,15 @@ export default function Profile() {
           contact: data.text
         }
       })
+      return []
+    }
+    else {
+      const errors = await res.json()
+      return errors
     }
   }
 
-  async function updateBio(data: { text: string }): Promise<void> {
+  async function updateBio(data: { text: string }): Promise<MsgErr> {
     const res = await fetch(`http://localhost:3000/user/${id}/updateBio`, {
       method: 'PUT',
       'credentials': 'include',
@@ -68,6 +72,11 @@ export default function Profile() {
           bio: data.text
         }
       })
+      return []
+    }
+    else {
+      const errors = await res.json()
+      return errors
     }
   }
 

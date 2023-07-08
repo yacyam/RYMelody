@@ -5,11 +5,14 @@ import { comparePassword } from '../utils/hash';
 
 passport.serializeUser((user: { id?: number }, done) => {
   console.log('serializing user...')
-  if (!user.id) {
-    return done(new Error('ID is undefined'))
+  try {
+    if (!user.id) {
+      throw new Error('ID is undefined')
+    }
+    done(null, user.id)
+  } catch (err) {
+    done(err)
   }
-  console.log(user.id)
-  done(null, user.id)
 })
 
 passport.deserializeUser(async (id: number, done) => {

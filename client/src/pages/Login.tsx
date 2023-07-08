@@ -1,6 +1,8 @@
 import { useState } from "react"
+import Errors from '../components/Error'
 import '../styles/pages/Register.css'
 import '../styles/pages/Login.css'
+import { MsgErr } from "../interfaces/Error"
 
 export default function Login() {
   const [formData, setFormData] = useState({
@@ -8,9 +10,7 @@ export default function Login() {
     password: ""
   })
 
-  const [formError, setFormError] = useState(false)
-
-  const [errors, setErrors] = useState<{ message: string }[]>([])
+  const [errors, setErrors] = useState<MsgErr>([])
 
   function updateForm(e: React.SyntheticEvent): void {
     const { name, value } = e.target as HTMLInputElement
@@ -21,16 +21,11 @@ export default function Login() {
         [name]: value
       }
     })
+    setErrors([])
   }
 
   async function submitForm(e: React.SyntheticEvent) {
     e.preventDefault()
-
-    if (formData.username === "" || formData.password === "") {
-      setFormError(true)
-      return
-    }
-    setFormError(false)
 
     const res = await fetch('http://localhost:3000/auth/login', {
       method: 'POST',
@@ -46,11 +41,6 @@ export default function Login() {
       window.open('http://localhost:5173/', '_self')
     }
   }
-
-  const displayErrors = errors.map((err, i) => {
-    return <li key={i}>{err.message}</li>
-  })
-
 
   return (
     <div className='register--container'>
@@ -73,11 +63,9 @@ export default function Login() {
           onChange={updateForm}
         />
 
-        {formError &&
-          <h3 className="login--enter-both">
-            Please Enter Both Username and Password</h3>
-        }
-        {displayErrors}
+        <Errors
+          errors={errors}
+        />
         <button className='register--btn'>Log In</button>
 
       </form>

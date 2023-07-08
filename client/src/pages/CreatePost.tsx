@@ -2,6 +2,8 @@ import { useState } from 'react'
 import '../styles/pages/CreatePost.css'
 import Tags from '../components/Tags'
 import { genres } from "../genreData.json"
+import { MsgErr } from '../interfaces/Error'
+import Errors from '../components/Error'
 
 interface Form {
   title: string,
@@ -22,7 +24,7 @@ export default function CreatePost() {
 
   const [errors, setErrors] = useState(false)
 
-  const [serverErrors, setServerErrors] = useState<{ message: string }[]>([])
+  const [serverErrors, setServerErrors] = useState<MsgErr>([])
 
   function updateForm(e: React.SyntheticEvent) {
     const { name, value } = e.target as HTMLInputElement
@@ -110,10 +112,6 @@ export default function CreatePost() {
     }
   }
 
-  const serverErrorElements = serverErrors.map((elem, i) => {
-    return <li key={i}>{elem.message}</li>
-  })
-
   return (
     <div className="createpost--container">
       <h1 className='createpost--title'>Create Post</h1>
@@ -155,9 +153,9 @@ export default function CreatePost() {
           </div>
         </div>
 
-        <ul>
-          {serverErrorElements}
-        </ul>
+        <Errors
+          errors={serverErrors}
+        />
 
         <button className='button--submit'>Create Post</button>
 

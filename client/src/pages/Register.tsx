@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import '../styles/pages/Register.css'
+import { MsgErr } from '../interfaces/Error'
+import Errors from '../components/Error'
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -9,7 +11,7 @@ export default function Register() {
     confirmPassword: ""
   })
 
-  const [formErrors, setFormErrors] = useState<{ message: string }[]>([])
+  const [formErrors, setFormErrors] = useState<MsgErr>([])
 
   function updateForm(e: React.SyntheticEvent): void {
     const { name, value } = e.target as HTMLInputElement
@@ -20,12 +22,11 @@ export default function Register() {
         [name]: value
       }
     })
+    setFormErrors([])
   }
 
   async function submitForm(e: React.SyntheticEvent): Promise<void> {
     e.preventDefault()
-
-    console.log(formData)
 
     const res = await fetch('http://localhost:3000/auth/register', {
       method: 'POST',
@@ -34,22 +35,13 @@ export default function Register() {
     })
 
     if (!res.ok) {
-      if (res.status === 400) {
-        const errs = await res.json()
-        setFormErrors(errs)
-      }
-      else {
-        setFormErrors([{ message: 'Something Went Wrong, Please Try Again' }])
-      }
+      const errs = await res.json()
+      setFormErrors(errs)
     }
     else {
       window.open('http://localhost:5173/login', '_self')
     }
   }
-
-  const displayErrors = formErrors.map((err, i) => {
-    return <li key={i}>{err.message}</li>
-  })
 
   return (
     <div className='register--container'>
@@ -86,9 +78,9 @@ export default function Register() {
           onChange={updateForm}
         />
 
-        <ul>
-          {displayErrors}
-        </ul>
+        <Errors
+          errors={formErrors}
+        />
         <button className='register--btn'>Register</button>
 
       </form>

@@ -5,14 +5,16 @@ import { FullPostData, Tags } from "../interfaces/Post"
 import AuthContext from "../context/AuthContext"
 import PostComment from "../components/PostComment"
 import { Edit } from "../components/Edit"
+import { MsgErr } from "../interfaces/Error"
+import Errors from "../components/Error"
 
 export default function Post() {
   const { id } = useParams()
   const { isLoggedIn } = useContext(AuthContext)
   const [formData, setFormData] = useState({ comment: "" })
-  const [errors, setErrors] = useState<{ message: string }[]>([])
+  const [commentErrors, setCommentErrors] = useState<MsgErr>([])
+  const [editDescErrors, setEditDescErrors] = useState<MsgErr>([])
   const [doesNotExist, setDoesNotExist] = useState<boolean>(false)
-  const [editDescErrors, setEditDescErrors] = useState<{ message: string }[]>([])
   const [fullPostData, setFullPostData] = useState<FullPostData | undefined>(undefined)
   const [isEditing, setIsEditing] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
@@ -67,13 +69,8 @@ export default function Post() {
     })
 
     if (!res.ok) {
-      if (res.status === 400) {
-        const errs = await res.json()
-        setEditDescErrors(errs)
-      }
-      else {
-        setEditDescErrors([{ message: 'Something Went Wrong, Please Try Again' }])
-      }
+      const errs = await res.json()
+      setEditDescErrors(errs)
     }
     else {
       setFullPostData(oldPostData => {
@@ -151,12 +148,14 @@ export default function Post() {
 
         </div>
 
-        {isEditing ? <>
-          <Edit text={fullPostData.description} updateFunc={updateDescription} />
-          <ul>
-            {editDescErrors.map((err, i) => <li key={i}>{err.message}</li>)}
-          </ul>
-        </> :
+        {isEditing ?
+          <>
+            <Edit text={fullPostData.description} updateFunc={updateDescription} />
+
+            <Errors
+              errors={editDescErrors}
+            />
+          </> :
           <p className="post--desc-text">{fullPostData.description}</p>
         }
 
@@ -196,14 +195,14 @@ export default function Post() {
   const postElement = createPostLayout()
   const commentElement = createCommentLayout()
 
-  function updateForm(e: React.SyntheticEvent): void {
+  function updateComment(e: React.SyntheticEvent): void {
     const { name, value } = e.target as HTMLInputElement
 
     setFormData(oldFormData => ({ ...oldFormData, [name]: value }))
-    setErrors([])
+    setCommentErrors([])
   }
 
-  async function submitForm(e: React.SyntheticEvent): Promise<void> {
+  async function submitComment(e: React.SyntheticEvent): Promise<void> {
     e.preventDefault()
 
     const res = await fetch(`http://localhost:3000/post/${id}/comment`, {
@@ -214,13 +213,8 @@ export default function Post() {
     })
 
     if (!res.ok) {
-      if (res.status === 500) {
-        setErrors([{ message: 'Something Went Wrong, Try Again.' }])
-      }
-      else {
-        const errs = await res.json()
-        setErrors(errs)
-      }
+      const errs = await res.json()
+      setCommentErrors(errs)
     }
     else {
       const { id, userId, username } = await res.json()
@@ -244,12 +238,6 @@ export default function Post() {
     }
   }
 
-
-
-  const displayErrors = errors.map((err, i) => {
-    return <li key={i}>{err.message}</li>
-  })
-
   return (
     <>
       {doesNotExist ? <h1 className="post--not-exist">This Post Does Not Exist</h1>
@@ -263,19 +251,19 @@ export default function Post() {
                 Must be Logged in to Comment on Post
               </h5>
               :
-              <form className="post--comment-form" onSubmit={submitForm}>
+              <form className="post--comment-form" onSubmit={submitComment}>
                 <legend>Leave a Comment on this Post</legend>
                 <textarea
                   name="comment"
                   className="post--comment-box"
                   placeholder="Comment"
-                  onChange={updateForm}
+                  onChange={updateComment}
                   value={formData.comment}
                 />
 
-                <ul>
-                  {displayErrors}
-                </ul>
+                <Errors
+                  errors={commentErrors}
+                />
 
                 <button>Post Comment</button>
               </form>

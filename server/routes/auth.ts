@@ -6,6 +6,8 @@ import passport from "passport";
 import { sendMail, verifyTimeSent } from "../utils/mail";
 const router = Router()
 
+const INTERNAL_ERR_MSG = [{ message: 'Something Went Wrong, Please Try Again' }]
+
 router.get('/login_failure', (req, res) => {
   console.log('failed')
   res.sendStatus(401)
@@ -35,7 +37,7 @@ router.post('/register', async (req, res) => {
     }
 
   } catch (err) {
-    res.sendStatus(500)
+    res.status(500).send(INTERNAL_ERR_MSG)
   }
 })
 

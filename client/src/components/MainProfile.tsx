@@ -1,34 +1,49 @@
 import { useState } from "react"
 import { UserProfile } from "../interfaces/Profile"
 import { Edit } from "./Edit"
+import Errors from "./Error"
 import "../styles/pages/Profile.css"
+import { MsgErr } from "../interfaces/Error"
 
 interface PropTypes extends UserProfile {
-  updateContactFunc: (arg: { text: string }) => Promise<void>,
-  updateBioFunc: (arg: { text: string }) => Promise<void>
+  updateContactFunc: (arg: { text: string }) => Promise<MsgErr>,
+  updateBioFunc: (arg: { text: string }) => Promise<MsgErr>
 }
 
 export default function MainProfile(props: PropTypes) {
   const [isEditingContact, setIsEditingContact] = useState(false)
   const [isEditingBio, setIsEditingBio] = useState(false)
-
+  const [editContactErrors, setEditContactErrors] = useState<MsgErr>([])
+  const [editBioErrors, setEditBioErrors] = useState<MsgErr>([])
 
   function updateEditingContact() {
     setIsEditingContact(prevEditing => !prevEditing)
+    setEditContactErrors([])
   }
 
   function updateEditingBio() {
     setIsEditingBio(prevEditing => !prevEditing)
+    setEditBioErrors([])
   }
 
   async function updateContact(data: { text: string }) {
-    await props.updateContactFunc(data)
-    setIsEditingContact(false)
+    const updateErrors = await props.updateContactFunc(data)
+    if (updateErrors.length === 0) {
+      setIsEditingContact(false)
+    }
+    else {
+      setEditContactErrors(updateErrors)
+    }
   }
 
   async function updateBio(data: { text: string }) {
-    await props.updateBioFunc(data)
-    setIsEditingBio(false)
+    const updateErrors = await props.updateBioFunc(data)
+    if (updateErrors.length === 0) {
+      setIsEditingBio(false)
+    }
+    else {
+      setEditBioErrors(updateErrors)
+    }
   }
 
   function createEditable() {
@@ -48,6 +63,10 @@ export default function MainProfile(props: PropTypes) {
           {isEditingContact ? "Cancel" : "Edit"}
         </p>
 
+        <Errors
+          errors={editContactErrors}
+        />
+
         {isEditingBio ?
           <Edit
             text={props.bio}
@@ -59,6 +78,10 @@ export default function MainProfile(props: PropTypes) {
         <p className="mainprofile--edit" onClick={updateEditingBio}>
           {isEditingBio ? "Cancel" : "Edit"}
         </p>
+
+        <Errors
+          errors={editBioErrors}
+        />
       </>
     )
   }

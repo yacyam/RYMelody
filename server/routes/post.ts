@@ -5,6 +5,8 @@ import * as Post from "../controllers/post"
 import { Comment, ModifyComment } from "../database/Post";
 const router = Router()
 
+const INTERNAL_ERR_MSG = [{ message: 'Something Went Wrong, Please Try Again' }]
+
 /**
  * Updates each comment to see if current user logged in can edit/delete it.
  * @param comments Obtained comments from post
@@ -51,7 +53,7 @@ router.post('/create', async (req, res) => {
       await Post.createTags(postId, tags)
       res.sendStatus(200)
     } catch (err) {
-      res.sendStatus(500)
+      res.status(500).send(INTERNAL_ERR_MSG)
     }
   }
 })
@@ -76,7 +78,7 @@ router.get('/all', async (req, res) => {
     const allPosts = await Post.getPosts(amountPosts, searchQuery, sortQuery, tagQuery)
     res.status(200).send(allPosts)
   } catch (err) {
-    res.sendStatus(500)
+    res.status(500).send(INTERNAL_ERR_MSG)
   }
 })
 
@@ -110,8 +112,7 @@ router.get('/:id', async (req, res) => {
       canModify: canModify
     })
   } catch (err) {
-    console.log(err)
-    res.sendStatus(500)
+    res.status(500).send(INTERNAL_ERR_MSG)
   }
 })
 
@@ -135,7 +136,7 @@ router.post('/:id/comment', async (req, res) => {
       const username = (req.user as User).username
       res.status(200).send({ id: generatedId, userId, username: username })
     } catch (err) {
-      res.sendStatus(500)
+      res.status(500).send(INTERNAL_ERR_MSG)
     }
   }
 })
@@ -161,7 +162,7 @@ router.put('/:id/comment', async (req, res) => {
     await Post.updateComment(commentId, comment)
     res.sendStatus(200)
   } catch (err) {
-    res.sendStatus(500)
+    res.status(500).send(INTERNAL_ERR_MSG)
   }
 
 })
@@ -185,7 +186,7 @@ router.post('/:id/like', async (req, res) => {
     await Post.likePost(postId, userId)
     res.status(200).send('liked')
   } catch (err) {
-    res.sendStatus(500)
+    res.status(500).send(INTERNAL_ERR_MSG)
   }
 })
 
@@ -208,7 +209,7 @@ router.put('/:id/update', async (req, res) => {
     await Post.updateDescription(postId, text)
     res.sendStatus(200)
   } catch (err) {
-    res.sendStatus(500)
+    res.status(500).send(INTERNAL_ERR_MSG)
   }
 })
 
@@ -232,7 +233,7 @@ router.delete('/:id', async (req, res) => {
     await Post.deletePost(postId)
     res.sendStatus(200)
   } catch (err) {
-    res.sendStatus(500)
+    res.status(500).send(INTERNAL_ERR_MSG)
   }
 })
 
@@ -260,7 +261,7 @@ router.delete('/:id/comment', async (req, res) => {
     await Post.deleteComment(commentId)
     res.sendStatus(200)
   } catch (err) {
-    res.sendStatus(500)
+    res.status(500).send(INTERNAL_ERR_MSG)
   }
 
 })
