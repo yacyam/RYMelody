@@ -23,7 +23,8 @@ const fakeUser = {
   id: 1,
   username: 'abcde',
   email: 'abcdefgh',
-  password: 'AKSOMCOXPZMCOPNEIOPNIOWPENFOEMKKNFCZNKWP'
+  password: 'AKSOMCOXPZMCOPNEIOPNIOWPENFOEMKKNFCZNKWP',
+  verified: true
 }
 
 beforeAll(async () => {
@@ -240,7 +241,7 @@ describe('inside of post endpoint', () => {
 
       const res = await request(app).post('/post/create').send(fakePost)
 
-      expect(res.status).toEqual(400)
+      expect(res.status).toEqual(401)
       expect(res.body).toEqual([{ message: 'Must Be Signed In To Create Post' }])
     })
 

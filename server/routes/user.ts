@@ -24,6 +24,10 @@ async function updateProfilePortion(
   const userId = req.params.id
   const { text } = req.body
   if (!('user' in req)) return res.sendStatus(401)
+
+  if (!(req.user as User).verified) {
+    return res.status(400).send([{ message: 'Must Be Verified To Update Profile' }])
+  }
   const sessionUserId = (req.user as User).id
 
   try {

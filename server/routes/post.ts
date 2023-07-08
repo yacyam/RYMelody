@@ -32,10 +32,13 @@ function checkIfModifiable(
 }
 
 router.post('/create', async (req, res) => {
-  let userId = 0
-  if ('user' in req) {
-    userId = (req.user as User).id
+  if (!('user' in req)) {
+    return res.status(401).send([{ message: 'Must Be Signed In To Create Post' }])
   }
+  if (!(req.user as User).verified) {
+    return res.status(401).send([{ message: 'Must Be Verified To Create Post' }])
+  }
+  const userId = (req.user as User).id
   const { title, desc, audio, audioSize, tags } = req.body
 
   const errors = authorizePostForm(title, desc, audio, audioSize, tags, userId)
@@ -116,6 +119,9 @@ router.post('/:id/comment', async (req, res) => {
   if (!('user' in req)) {
     return res.status(401).send([{ message: 'Must Be Logged In To Comment' }])
   }
+  if (!(req.user as User).verified) {
+    return res.status(401).send([{ message: 'Must Be Verified To Create Comment' }])
+  }
   const userId = (req.user as User).id
   const postId = req.params.id
   const { comment } = req.body
@@ -137,6 +143,9 @@ router.post('/:id/comment', async (req, res) => {
 router.put('/:id/comment', async (req, res) => {
   if (!('user' in req)) {
     return res.status(401).send([{ message: 'Must Be Logged In To Edit Comment' }])
+  }
+  if (!(req.user as User).verified) {
+    return res.status(401).send([{ message: 'Must Be Verified To Edit Comment' }])
   }
   const commentId = req.body.id
   const { userId, comment } = req.body
@@ -161,6 +170,9 @@ router.post('/:id/like', async (req, res) => {
   if (!('user' in req)) {
     return res.status(401).send([{ message: 'Must Be Logged In To Like Post' }])
   }
+  if (!(req.user as User).verified) {
+    return res.status(401).send([{ message: 'Must Be Verified To Like Post' }])
+  }
   const postId = req.params.id
   const userId = (req.user as User).id
   try {
@@ -183,6 +195,9 @@ router.put('/:id/update', async (req, res) => {
   if (!('user' in req)) {
     return res.status(401).send([{ message: 'Only Original Poster Can Edit This Post' }])
   }
+  if (!(req.user as User).verified) {
+    return res.status(400).send([{ message: 'Must Be Verified To Edit Post' }])
+  }
   const userId = (req.user as User).id
 
   try {
@@ -201,6 +216,9 @@ router.delete('/:id', async (req, res) => {
   const postId = req.params.id
   if (!('user' in req)) {
     return res.status(401).send([{ message: 'Only Original Poster Can Edit This Post' }])
+  }
+  if (!(req.user as User).verified) {
+    return res.status(400).send([{ message: 'Must Be Verified To Delete Post' }])
   }
   const userId = (req.user as User).id
   try {
@@ -221,6 +239,9 @@ router.delete('/:id', async (req, res) => {
 router.delete('/:id/comment', async (req, res) => {
   if (!('user' in req)) {
     return res.status(401).send([{ message: 'Only Original Commenter Can Delete Comment' }])
+  }
+  if (!(req.user as User).verified) {
+    return res.status(400).send([{ message: 'Must Be Verified To Delete Comment' }])
   }
   const userId = (req.user as User).id
   const postId = req.params.id

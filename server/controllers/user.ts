@@ -1,6 +1,6 @@
 import { pool } from "../database/index";
 import * as Query from "../database/queries"
-import { User, OptionalUser } from "../database/User";
+import { User, OptionalUser, Verify } from "../database/User";
 import { QueryResult } from 'pg'
 
 /**
@@ -49,18 +49,73 @@ async function findOne(userOpt: OptionalUser): Promise<User | undefined> {
  * @param username 
  * @param email 
  * @param hashedPassword A hashed representation of the password 
+ * @returns The id of the newly created user
  */
 async function createUser(
   username: string,
   email: string,
-  hashedPassword: string): Promise<void> {
+  hashedPassword: string): Promise<number> {
 
-  await pool.query(Query.createUser, [username, email, hashedPassword])
+  const userId: QueryResult = await pool.query(Query.createUser, [username, email, hashedPassword])
 
+  return userId.rows[0].id
+}
+
+async function verifyUser(
+  userId: number
+): Promise<void> {
+
+  await pool.query(Query.verifyUser, [userId])
+}
+
+/**
+ * Inserts token used for verifying user
+ * @param userId 
+ * @param verifyToken Token associated with the link to verify the user
+ */
+async function insertToken(
+  userId: number,
+  verifyToken: string
+): Promise<void> {
+
+  await pool.query(Query.insertToken, [userId, verifyToken])
+
+}
+
+async function updateToken(
+  userId: number,
+  newToken: string
+): Promise<void> {
+
+  await pool.query(Query.updateToken, [userId, newToken])
+}
+
+async function deleteToken(
+  userId: number
+): Promise<void> {
+
+  await pool.query(Query.deleteToken, [userId])
+}
+
+async function findVerifyData(
+  verifyToken: string
+): Promise<Verify | undefined> {
+  const verifyData: QueryResult = await pool.query(Query.findVerifyData, [verifyToken])
+
+  if (verifyData.rows.length === 0) {
+    return undefined
+  }
+
+  return verifyData.rows[0]
 }
 
 export {
   findById,
+  findVerifyData,
   findOne,
-  createUser
+  createUser,
+  verifyUser,
+  insertToken,
+  updateToken,
+  deleteToken
 }

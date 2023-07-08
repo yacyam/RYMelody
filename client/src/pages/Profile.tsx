@@ -12,6 +12,8 @@ export default function Profile() {
   const [amountShowLikes, setAmountShowLikes] = useState(3)
   const [doesNotExist, setDoesNotExist] = useState<boolean>(false)
 
+  //have to add errors to profile for user validation
+
   useEffect(() => {
     fetch(`http://localhost:3000/user/${id}`, {
       'credentials': 'include'

@@ -17,7 +17,8 @@ const fakeUser = {
   id: 1,
   username: 'abcde',
   email: 'abcdefgh',
-  password: 'AKSOMCOXPZMCOPNEIOPNIOWPENFOEMKKNFCZNKWP'
+  password: 'AKSOMCOXPZMCOPNEIOPNIOWPENFOEMKKNFCZNKWP',
+  verified: true
 }
 
 const fakeProfile = {
