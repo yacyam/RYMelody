@@ -74,6 +74,8 @@ const fakeRawComment = {
   comment: 'abcdefgh'
 }
 
+const INTERNAL_ERR_MSG = [{ message: 'Something Went Wrong, Please Try Again' }]
+
 afterEach(() => {
   jest.clearAllMocks()
 })
@@ -83,6 +85,11 @@ function createPostIdMock() {
   (PostController.getComments as jest.Mock).mockReturnValue([]);
   (PostController.getAllLikes as jest.Mock).mockReturnValue(1);
   (PostController.getTags as jest.Mock).mockReturnValue(TAGS);
+}
+
+function unverifiedMock() {
+  (UserController.findById as jest.Mock)
+    .mockReturnValueOnce({ ...fakeUser, verified: false })
 }
 
 describe('inside of post endpoint', () => {
@@ -105,6 +112,7 @@ describe('inside of post endpoint', () => {
       const res = await request(app).get('/post/1')
 
       expect(res.status).toEqual(500)
+      expect(res.body).toEqual(INTERNAL_ERR_MSG)
       expect(PostController.findById).toBeCalledTimes(1)
       expect(PostController.findById).toReturnWith(fakePost)
       expect(PostController.getComments).toBeCalledTimes(1)
@@ -220,6 +228,7 @@ describe('inside of post endpoint', () => {
       const res = await request(app).get('/post/all?q=10&search=abc&newest=true&tags=pop')
 
       expect(res.status).toEqual(500)
+      expect(res.body).toEqual(INTERNAL_ERR_MSG)
       expect(PostController.getPosts).toBeCalledTimes(1)
       expect(PostController.getPosts).toBeCalledWith("10", "abc", "DESC", "pop")
     })
@@ -245,6 +254,15 @@ describe('inside of post endpoint', () => {
       expect(res.body).toEqual([{ message: 'Must Be Signed In To Create Post' }])
     })
 
+    it('should fail if user is not verified', async () => {
+      unverifiedMock()
+
+      const res = await user.post('/post/create').send(fakePost)
+
+      expect(res.status).toEqual(401)
+      expect(res.body).toEqual([{ message: 'Must Be Verified To Create Post' }])
+    })
+
     it('should fail if user is signed in and some aspect of the post is missing', async () => {
       const newPost = {
         ...fakePost,
@@ -266,6 +284,7 @@ describe('inside of post endpoint', () => {
       )
 
       expect(res.status).toEqual(500)
+      expect(res.body).toEqual(INTERNAL_ERR_MSG)
       expect(PostController.createPost).toBeCalledTimes(1)
       expect(PostController.createPost)
         .toBeCalledWith(1, fakePost.title, fakePost.description, fakePost.audio)
@@ -280,6 +299,7 @@ describe('inside of post endpoint', () => {
       )
 
       expect(res.status).toEqual(500)
+      expect(res.body).toEqual(INTERNAL_ERR_MSG)
       expect(PostController.createPost).toBeCalledTimes(1)
       expect(PostController.createPost)
         .toBeCalledWith(1, fakePost.title, fakePost.description, fakePost.audio)
@@ -309,8 +329,17 @@ describe('inside of post endpoint', () => {
 
       const res = await request(app).post('/post/1/comment')
 
-      expect(res.status).toEqual(401)
-      expect(res.body).toEqual([{ message: 'Must Be Logged In To Comment' }])
+      expect(res.status).toBe(401)
+      expect(res.body).toEqual([{ message: 'Must Be Logged In To Post Comment' }])
+    })
+
+    it('should fail if the user is not signed in', async () => {
+      unverifiedMock()
+
+      const res = await user.post('/post/1/comment')
+
+      expect(res.status).toBe(401)
+      expect(res.body).toEqual([{ message: 'Must Be Verified To Post Comment' }])
     })
 
     it('should fail if the comment form from user does not authorize correctly', async () => {
@@ -333,6 +362,7 @@ describe('inside of post endpoint', () => {
       const res = await user.post('/post/1/comment').send({ comment: 'comment' })
 
       expect(res.status).toEqual(500)
+      expect(res.body).toEqual(INTERNAL_ERR_MSG)
       expect(Auth.authorizeCommentForm).toBeCalledTimes(1)
       expect(Auth.authorizeCommentForm).toBeCalledWith("1", "comment")
       expect(PostController.createComment).toBeCalledTimes(1)
@@ -362,8 +392,17 @@ describe('inside of post endpoint', () => {
 
       const res = await request(app).post('/post/1/like')
 
-      expect(res.status).toEqual(401)
+      expect(res.status).toBe(401)
       expect(res.body).toEqual([{ message: 'Must Be Logged In To Like Post' }])
+    })
+
+    it('should fail if user is not verified', async () => {
+      unverifiedMock()
+
+      const res = await user.post('/post/1/like')
+
+      expect(res.status).toBe(401)
+      expect(res.body).toEqual([{ message: 'Must Be Verified To Like Post' }])
     })
 
     it('should fail if the post controller fails to return', async () => {
@@ -372,6 +411,7 @@ describe('inside of post endpoint', () => {
       const res = await user.post('/post/1/like')
 
       expect(res.status).toEqual(500)
+      expect(res.body).toEqual(INTERNAL_ERR_MSG)
       expect(PostController.userLikedPost).toBeCalledTimes(1)
       expect(PostController.userLikedPost).toBeCalledWith("1", fakeUser.id)
     })
@@ -383,6 +423,7 @@ describe('inside of post endpoint', () => {
       const res = await user.post('/post/1/like')
 
       expect(res.status).toEqual(500)
+      expect(res.body).toEqual(INTERNAL_ERR_MSG)
       expect(PostController.userLikedPost).toBeCalledTimes(1)
       expect(PostController.userLikedPost).toBeCalledWith("1", fakeUser.id)
       expect(PostController.unlikePost).toBeCalledTimes(1)
@@ -396,6 +437,7 @@ describe('inside of post endpoint', () => {
       const res = await user.post('/post/1/like')
 
       expect(res.status).toEqual(500)
+      expect(res.body).toEqual(INTERNAL_ERR_MSG)
       expect(PostController.userLikedPost).toBeCalledTimes(1)
       expect(PostController.userLikedPost).toBeCalledWith("1", fakeUser.id)
       expect(PostController.likePost).toBeCalledTimes(1)
@@ -438,8 +480,17 @@ describe('inside of post endpoint', () => {
 
       const res = await request(app).put('/post/1/update')
 
-      expect(res.status).toEqual(401)
+      expect(res.status).toBe(401)
       expect(res.body).toEqual([{ message: 'Only Original Poster Can Edit This Post' }])
+    })
+
+    it('should fail if user is not verified', async () => {
+      unverifiedMock()
+
+      const res = await user.put('/post/1/update')
+
+      expect(res.status).toBe(401)
+      expect(res.body).toEqual([{ message: 'Must Be Verified To Edit Post' }])
     })
 
     jest.spyOn(Auth, 'authorizeUpdateForm');
@@ -450,6 +501,7 @@ describe('inside of post endpoint', () => {
       const res = await user.put('/post/23/update').send({ text: 'abcde' })
 
       expect(res.status).toEqual(500)
+      expect(res.body).toEqual(INTERNAL_ERR_MSG)
       expect(Auth.authorizeUpdateForm).toBeCalledTimes(1)
       expect(Auth.authorizeUpdateForm).toBeCalledWith(fakeUser.id, "23", "abcde")
     })
@@ -472,6 +524,7 @@ describe('inside of post endpoint', () => {
       const res = await user.put('/post/32/update').send({ text: 'abcdef' })
 
       expect(res.status).toEqual(500)
+      expect(res.body).toEqual(INTERNAL_ERR_MSG)
       expect(Auth.authorizeUpdateForm).toBeCalledTimes(1)
       expect(Auth.authorizeUpdateForm).toBeCalledWith(fakeUser.id, "32", "abcdef")
       expect(PostController.updateDescription).toBeCalledTimes(1)
@@ -500,11 +553,21 @@ describe('inside of post endpoint', () => {
       expect(res.body).toEqual([{ message: 'Only Original Poster Can Edit This Post' }])
     })
 
+    it('should fail if user is not verified', async () => {
+      unverifiedMock()
+
+      const res = await user.delete('/post/4')
+
+      expect(res.status).toBe(401)
+      expect(res.body).toEqual([{ message: 'Must Be Verified To Delete Post' }])
+    })
+
     it('should fail if finding the post throws an error', async () => {
       (PostController.findById as jest.Mock).mockImplementationOnce(() => { throw new Error() })
       const res = await user.delete('/post/4')
 
       expect(res.status).toEqual(500)
+      expect(res.body).toEqual(INTERNAL_ERR_MSG)
       expect(PostController.findById).toBeCalledTimes(1)
     })
 
@@ -539,6 +602,7 @@ describe('inside of post endpoint', () => {
       const res = await user.delete('/post/15')
 
       expect(res.status).toEqual(500)
+      expect(res.body).toEqual(INTERNAL_ERR_MSG)
       expect(PostController.findById).toBeCalledTimes(1)
       expect(PostController.deletePost).toBeCalledTimes(1)
       expect(PostController.deletePost).toBeCalledWith("15")
@@ -565,11 +629,21 @@ describe('inside of post endpoint', () => {
       expect(res.body).toEqual([{ message: 'Must Be Logged In To Edit Comment' }])
     })
 
+    it('should fail if user is not verified', async () => {
+      unverifiedMock()
+
+      const res = await user.put('/post/1/comment')
+
+      expect(res.status).toBe(401)
+      expect(res.body).toEqual([{ message: 'Must Be Verified To Edit Comment' }])
+    })
+
     it('should fail if authorizing comment update throws error', async () => {
       (Auth.authorizeUpdateComment as jest.Mock).mockImplementationOnce(() => { throw new Error() })
       const res = await user.put('/post/1/comment')
 
       expect(res.status).toBe(500)
+      expect(res.body).toEqual(INTERNAL_ERR_MSG)
       expect(Auth.authorizeUpdateComment).toBeCalledTimes(1)
     })
 
@@ -589,6 +663,7 @@ describe('inside of post endpoint', () => {
       const res = await user.put('/post/20/comment').send({ id: 1, userId: 1, comment: "abcde" })
 
       expect(res.status).toBe(500)
+      expect(res.body).toEqual(INTERNAL_ERR_MSG)
       expect(Auth.authorizeUpdateComment).toBeCalledTimes(1)
       expect(Auth.authorizeUpdateComment).toBeCalledWith(1, fakeUser.id, 1, "20", "abcde")
     })
@@ -616,12 +691,22 @@ describe('inside of post endpoint', () => {
       expect(res.body).toEqual([{ message: 'Only Original Commenter Can Delete Comment' }])
     })
 
+    it('should fail if user is not verified', async () => {
+      unverifiedMock()
+
+      const res = await user.delete('/post/1/comment')
+
+      expect(res.status).toBe(401)
+      expect(res.body).toEqual([{ message: 'Must Be Verified To Delete Comment' }])
+    })
+
     it('should fail if finding the comment throws an error', async () => {
       (PostController.findCommentById as jest.Mock).mockImplementationOnce(() => { throw new Error() })
 
       const res = await user.delete('/post/5/comment').send({ id: 5 })
 
       expect(res.status).toBe(500)
+      expect(res.body).toEqual(INTERNAL_ERR_MSG)
       expect(PostController.findCommentById).toBeCalledTimes(1)
       expect(PostController.findCommentById).toBeCalledWith(5)
     })
@@ -672,6 +757,7 @@ describe('inside of post endpoint', () => {
         .send({ id: fakeRawComment.id });
 
       expect(res.status).toBe(500)
+      expect(res.body).toEqual(INTERNAL_ERR_MSG)
       expect(PostController.findCommentById).toBeCalledTimes(1)
       expect(PostController.findCommentById).toBeCalledWith(fakeRawComment.id)
       expect(PostController.deleteComment).toBeCalledTimes(1)

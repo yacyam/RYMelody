@@ -61,6 +61,10 @@ async function createUser(
   return userId.rows[0].id
 }
 
+/**
+ * Verifies user profile for full website access
+ * @param userId 
+ */
 async function verifyUser(
   userId: number
 ): Promise<void> {
@@ -82,6 +86,11 @@ async function insertToken(
 
 }
 
+/**
+ * Updates unverified user with new token
+ * @param userId 
+ * @param newToken Token associated with user verification
+ */
 async function updateToken(
   userId: number,
   newToken: string
@@ -90,6 +99,10 @@ async function updateToken(
   await pool.query(Query.updateToken, [userId, newToken])
 }
 
+/**
+ * Deletes token associated with user
+ * @param userId 
+ */
 async function deleteToken(
   userId: number
 ): Promise<void> {
@@ -97,6 +110,11 @@ async function deleteToken(
   await pool.query(Query.deleteToken, [userId])
 }
 
+/**
+ * Finds the data associated with verification token
+ * @param verifyToken 
+ * @returns Information about user and the time token was sent
+ */
 async function findVerifyData(
   verifyToken: string
 ): Promise<Verify | undefined> {

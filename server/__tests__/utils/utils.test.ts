@@ -8,6 +8,7 @@ import { User, OptionalUser } from '../../database/User';
 import * as Auth from '../../utils/formAuth'
 import { generateRandomStrings } from '../../utils/fuzz';
 import { Tags } from '../../database/Post';
+import { verifyTimeSent } from '../../utils/mail'
 
 const NOT_FILLED_ERROR = 'All Fields Must Be Filled In'
 
@@ -473,6 +474,70 @@ describe('inside of form auth', () => {
 
       expect(errors.length).toBe(0)
       expect(PostController.findCommentById).toBeCalledTimes(1)
+    })
+  })
+
+  describe('when verifying time sent of verification token', () => {
+    it('should fail if token is more than a day old in same month and year', () => {
+      const moreOneDay = new Date(new Date().getTime() - ((1000 * 60 * 60 * 24) + 1))
+      const currTime = new Date()
+
+      const check = verifyTimeSent(moreOneDay)
+
+      expect(check).toBe(false)
+      expect(moreOneDay.getDay()).toEqual(currTime.getDay() - 1)
+    })
+
+    it('should fail if token is some amount of days old in the same month and year', () => {
+      const someDays = 2 + Math.floor(Math.random() * 10)
+      const coupleDaysOff = new Date(new Date().getTime() - (1000 * 60 * 60 * 24 * someDays))
+      const currTime = new Date()
+
+      const dayOffDay = coupleDaysOff.getDay()
+      const currTimeDay = currTime.getDay()
+
+      const check = verifyTimeSent(coupleDaysOff)
+
+      expect(check).toBe(false)
+    })
+
+    it('should fail if token is different month same year', () => {
+      const moreOneMonth = new Date(new Date().getTime() - (1000 * 60 * 60 * 24 * 31))
+
+      const check = verifyTimeSent(moreOneMonth)
+
+      expect(check).toBe(false)
+
+    })
+
+    it('should fail if token is off by a few months in same year', () => {
+      const someMonths = 1 + Math.floor(Math.random() * 8)
+      const moreSomeMonths = new Date(new Date().getTime() - (1000 * 60 * 60 * 24 * 31 * someMonths))
+
+      const check = verifyTimeSent(moreSomeMonths)
+
+      expect(check).toBe(false)
+    })
+
+    it('should fail if token is off by a year same month and day', () => {
+      const oneYear = new Date(new Date().getTime() - (1000 * 60 * 60 * 24 * 31 * 12))
+      const currTime = new Date()
+
+      const check = verifyTimeSent(oneYear)
+
+      expect(check).toBe(false)
+      expect(currTime.getFullYear()).toEqual(oneYear.getFullYear() + 1)
+    })
+
+    it('should pass if token was sent in the same day', () => {
+      const sameDayBoundary = new Date(new Date().getTime() - ((1000 * 60 * 60 * 24) - 1))
+      const sameDayCloser = new Date(new Date().getTime() - (1000 * 60 * 60 * 8))
+
+      const check1 = verifyTimeSent(sameDayBoundary)
+      const check2 = verifyTimeSent(sameDayCloser)
+
+      expect(check1).toBe(true)
+      expect(check2).toBe(true)
     })
   })
 })

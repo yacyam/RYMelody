@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { NextFunction, Request, Response, Router } from "express";
 import { authorizeCommentForm, authorizePostForm, authorizeUpdateComment, authorizeUpdateForm } from "../utils/formAuth";
 import { User } from "../database/User";
 import * as Post from "../controllers/post"
@@ -118,10 +118,10 @@ router.get('/:id', async (req, res) => {
 
 router.post('/:id/comment', async (req, res) => {
   if (!('user' in req)) {
-    return res.status(401).send([{ message: 'Must Be Logged In To Comment' }])
+    return res.status(401).send([{ message: 'Must Be Logged In To Post Comment' }])
   }
   if (!(req.user as User).verified) {
-    return res.status(401).send([{ message: 'Must Be Verified To Create Comment' }])
+    return res.status(401).send([{ message: 'Must Be Verified To Post Comment' }])
   }
   const userId = (req.user as User).id
   const postId = req.params.id
@@ -197,7 +197,7 @@ router.put('/:id/update', async (req, res) => {
     return res.status(401).send([{ message: 'Only Original Poster Can Edit This Post' }])
   }
   if (!(req.user as User).verified) {
-    return res.status(400).send([{ message: 'Must Be Verified To Edit Post' }])
+    return res.status(401).send([{ message: 'Must Be Verified To Edit Post' }])
   }
   const userId = (req.user as User).id
 
@@ -214,13 +214,13 @@ router.put('/:id/update', async (req, res) => {
 })
 
 router.delete('/:id', async (req, res) => {
-  const postId = req.params.id
   if (!('user' in req)) {
     return res.status(401).send([{ message: 'Only Original Poster Can Edit This Post' }])
   }
   if (!(req.user as User).verified) {
-    return res.status(400).send([{ message: 'Must Be Verified To Delete Post' }])
+    return res.status(401).send([{ message: 'Must Be Verified To Delete Post' }])
   }
+  const postId = req.params.id
   const userId = (req.user as User).id
   try {
     const post = await Post.findById(postId)
@@ -242,7 +242,7 @@ router.delete('/:id/comment', async (req, res) => {
     return res.status(401).send([{ message: 'Only Original Commenter Can Delete Comment' }])
   }
   if (!(req.user as User).verified) {
-    return res.status(400).send([{ message: 'Must Be Verified To Delete Comment' }])
+    return res.status(401).send([{ message: 'Must Be Verified To Delete Comment' }])
   }
   const userId = (req.user as User).id
   const postId = req.params.id

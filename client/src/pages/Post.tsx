@@ -14,6 +14,7 @@ export default function Post() {
   const [formData, setFormData] = useState({ comment: "" })
   const [commentErrors, setCommentErrors] = useState<MsgErr>([])
   const [editDescErrors, setEditDescErrors] = useState<MsgErr>([])
+  const [deletePostErrors, setDeletePostErrors] = useState<MsgErr>([])
   const [doesNotExist, setDoesNotExist] = useState<boolean>(false)
   const [fullPostData, setFullPostData] = useState<FullPostData | undefined>(undefined)
   const [isEditing, setIsEditing] = useState(false)
@@ -104,6 +105,11 @@ export default function Post() {
     if (res.ok) {
       window.open('http://localhost:5173/', '_self')
     }
+    else {
+      const errors = await res.json()
+      setDeletePostErrors(errors)
+      setConfirmDelete(false)
+    }
   }
 
   function createTagString(tags: Tags) {
@@ -174,6 +180,9 @@ export default function Post() {
             <p onClick={deletePost}>{confirmDelete ? "Confirm?" : "Delete"}</p>
           </div>
         }
+        <Errors
+          errors={deletePostErrors}
+        />
 
       </div>
     )

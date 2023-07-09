@@ -67,8 +67,25 @@ describe('inside of user endpoint', () => {
     it('should fail if user is not serialized inside of session', async () => {
       await updateProfilePortion(REQ, RES, 10, updateProfileFunc)
 
-      expect(RES.sendStatus).toBeCalledTimes(1)
-      expect(RES.sendStatus).toBeCalledWith(401)
+      expect(RES.status).toBeCalledTimes(1)
+      expect(RES.status).toBeCalledWith(401)
+    })
+
+    it('should fail if user is not verified', async () => {
+      const unverifiedReq = {
+        ...REQ,
+        user: {
+          ...fakeUser,
+          verified: false
+        }
+      } as unknown as Request
+
+      await updateProfilePortion(unverifiedReq, RES, 10, updateProfileFunc)
+
+      expect(RES.status).toBeCalledTimes(1)
+      expect(RES.status).toBeCalledWith(401)
+      expect(RES.send).toBeCalledTimes(1)
+      expect(RES.send).toBeCalledWith([{ message: 'Must Be Verified To Update Profile' }])
     })
 
     it('should fail if text length desired is smaller than body text', async () => {

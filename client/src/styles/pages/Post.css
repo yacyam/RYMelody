@@ -13,7 +13,7 @@
 }
 
 .post--main-container {
-  min-height: 300px;
+  min-height: 330px;
   padding-bottom: 20px;
   min-width: 0;
   display: flex;
@@ -101,7 +101,7 @@
 }
 
 .post--likes {
-  font-size: 22px;
+  font-size: 20px;
 }
 
 .post--edit {
@@ -116,8 +116,8 @@
 
 .like--select {
   padding: 10px;
-  min-width: 60px;
-  width: 70px;
+  width: 60px;
+  height: 40px;
   background: none;
   color: #8a8a8a;
   border: 1px solid #8a8a8a;

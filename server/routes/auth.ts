@@ -63,12 +63,12 @@ router.get('/verify/:token', async (req, res) => {
   try {
     const verifyData = await User.findVerifyData(token)
     if (!verifyData) {
-      return res.status(400).send('Token Does Not Exist')
+      return res.status(404).send('Token Does Not Exist')
     }
     const dateStored = verifyData.time_sent
     const user = await User.findById(verifyData.userid)
     if (!user) {
-      return res.status(401).send('User Associated With Token Does Not Exist.')
+      return res.status(404).send('User Associated With Token Does Not Exist.')
     }
     if (!verifyTimeSent(dateStored)) {
       const newToken = createToken()

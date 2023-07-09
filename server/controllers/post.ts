@@ -190,6 +190,11 @@ async function getTags(postId: string): Promise<Tags> {
   return tags.rows[0]
 }
 
+/**
+ * Obtains all identification information about comment
+ * @param id
+ * @returns Main identification of comment. Returns associated user and post id.
+ */
 async function findCommentById(
   id: string | number,
 ): Promise<RawComment | undefined> {
@@ -200,6 +205,11 @@ async function findCommentById(
   return comment.rows[0]
 }
 
+/**
+ * Updates comment with new text
+ * @param id Identification associated with comment
+ * @param comment 
+ */
 async function updateComment(
   id: string | number,
   comment: string
@@ -208,6 +218,7 @@ async function updateComment(
 
 }
 
+//If i add replies need to also delete them
 async function deleteComment(
   id: string | number
 ): Promise<void> {

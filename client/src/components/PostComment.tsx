@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Comment, FullPostData } from "../interfaces/Post";
 import "../styles/components/PostComment.css"
 import { Edit } from "./Edit";
+import Errors from "./Error";
+import { MsgErr } from "../interfaces/Error";
 
 interface CommentSetter extends Comment {
   updatePost: (arg: ((value: FullPostData | undefined) => FullPostData | undefined)) => void,
@@ -11,8 +13,8 @@ interface CommentSetter extends Comment {
 export default function PostComment(props: CommentSetter) {
   const [isEditing, setIsEditing] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
-  const [updateCommentErrors, setUpdateCommentErrors] = useState<{ message: string }[]>([])
-  const [deleteCommentErrors, setDeleteCommentErrors] = useState<{ message: string }[]>([])
+  const [updateCommentErrors, setUpdateCommentErrors] = useState<MsgErr>([])
+  const [deleteCommentErrors, setDeleteCommentErrors] = useState<MsgErr>([])
 
   function gotoUserProfile(e: React.SyntheticEvent) {
     window.open(`http://localhost:5173/user/${props.userid}`, '_self')
@@ -41,13 +43,8 @@ export default function PostComment(props: CommentSetter) {
     })
 
     if (!res.ok) {
-      if (res.status === 500) {
-        setUpdateCommentErrors([{ message: 'Something Went Wrong, Please Try Again ' }])
-      }
-      else {
-        const errors = await res.json()
-        setUpdateCommentErrors(errors)
-      }
+      const errors = await res.json()
+      setUpdateCommentErrors(errors)
     }
     else {
       props.updatePost(oldPostData => {
@@ -72,7 +69,7 @@ export default function PostComment(props: CommentSetter) {
     }
   }
 
-  async function deleteComment() {
+  async function deleteComment(): Promise<void> {
     if (!confirmDelete) {
       setConfirmDelete(true)
       setDeleteCommentErrors([])
@@ -93,13 +90,9 @@ export default function PostComment(props: CommentSetter) {
     })
 
     if (!res.ok) {
-      if (res.status === 500) {
-        setDeleteCommentErrors([{ message: 'Something Went Wrong, Please Try Again ' }])
-      }
-      else {
-        const errors = await res.json()
-        setDeleteCommentErrors(errors)
-      }
+      const errors = await res.json()
+      setDeleteCommentErrors(errors)
+      setConfirmDelete(false)
     } else {
       props.updatePost(oldPostData => {
         if (!oldPostData) return oldPostData
@@ -115,14 +108,6 @@ export default function PostComment(props: CommentSetter) {
       })
     }
   }
-
-  const displayUpdateErrors = updateCommentErrors.map((err, i) => {
-    return <li key={i}>{err.message}</li>
-  })
-
-  const displayDeleteErrors = deleteCommentErrors.map((err, i) => {
-    return <li key={i}>{err.message}</li>
-  })
 
   return (
     <div className="comment--container">
@@ -143,9 +128,6 @@ export default function PostComment(props: CommentSetter) {
             <h4 className="comment--main-text">{props.comment}</h4>
           </div>
       }
-      <ul>
-        {displayUpdateErrors}
-      </ul>
       {
         props.canModify &&
         <div className="comment--edit">
@@ -153,9 +135,12 @@ export default function PostComment(props: CommentSetter) {
           <p onClick={deleteComment}>{confirmDelete ? "Confirm?" : "Delete"}</p>
         </div>
       }
-      <ul>
-        {displayDeleteErrors}
-      </ul>
+      <Errors
+        errors={updateCommentErrors}
+      />
+      <Errors
+        errors={deleteCommentErrors}
+      />
     </div>
   )
 }

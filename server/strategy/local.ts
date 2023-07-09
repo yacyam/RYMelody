@@ -16,7 +16,6 @@ passport.serializeUser((user: { id?: number }, done) => {
 })
 
 passport.deserializeUser(async (id: number, done) => {
-  console.log('deserializing user...')
   try {
     const user = await User.findById(id)
     if (!user) {
@@ -37,7 +36,6 @@ passport.use(new LocalStrategy({
     try {
       console.log('logging in...')
       const user = await User.findOne({ username: username })
-      console.log(user)
       if (!user) {
         throw new Error('User Does Not Exist')
       }
