@@ -237,6 +237,7 @@ export default function Post() {
           userid: userId,
           username: username,
           comment: formData.comment,
+          replies: [],
           canModify: true
         })
         return {

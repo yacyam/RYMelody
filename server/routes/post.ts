@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response, Router } from "express";
-import { authorizeCommentForm, authorizePostForm, authorizeUpdateComment, authorizeUpdateForm } from "../utils/formAuth";
+import { authorizeCommentForm, authorizePostForm, authorizeReplyForm, authorizeUpdateComment, authorizeUpdateForm } from "../utils/formAuth";
 import { User } from "../database/User";
 import * as Post from "../controllers/post"
 import { Comment, ModifyComment } from "../database/Post";
@@ -264,6 +264,29 @@ router.delete('/:id/comment', async (req, res) => {
     res.status(500).send(INTERNAL_ERR_MSG)
   }
 
+})
+
+router.post('/:id/reply', async (req, res) => {
+  if (!('user' in req)) {
+    res.status(401).send([{ message: 'Must Be Logged In To Reply' }])
+  }
+  const userId = (req.user as User).id
+  const { commentId, replyId, reply, isMainCommentReply } = req.body
+  const postId = req.params.id
+
+  try {
+    const errors = await authorizeReplyForm(commentId, replyId, postId, reply, isMainCommentReply)
+
+    if (errors.length > 0) {
+      return res.status(400).send(errors)
+    }
+
+    const newReplyId = await Post.createReply(userId, commentId, replyId, postId, reply)
+    const username = (req.user as User).username
+    res.status(200).send({ newReplyId, userId, username })
+  } catch (err) {
+    res.status(500).send(INTERNAL_ERR_MSG)
+  }
 })
 
 export {

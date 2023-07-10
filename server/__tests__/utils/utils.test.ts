@@ -480,21 +480,15 @@ describe('inside of form auth', () => {
   describe('when verifying time sent of verification token', () => {
     it('should fail if token is more than a day old in same month and year', () => {
       const moreOneDay = new Date(new Date().getTime() - ((1000 * 60 * 60 * 24) + 1))
-      const currTime = new Date()
 
       const check = verifyTimeSent(moreOneDay)
 
       expect(check).toBe(false)
-      expect(moreOneDay.getDay()).toEqual(currTime.getDay() - 1)
     })
 
     it('should fail if token is some amount of days old in the same month and year', () => {
       const someDays = 2 + Math.floor(Math.random() * 10)
       const coupleDaysOff = new Date(new Date().getTime() - (1000 * 60 * 60 * 24 * someDays))
-      const currTime = new Date()
-
-      const dayOffDay = coupleDaysOff.getDay()
-      const currTimeDay = currTime.getDay()
 
       const check = verifyTimeSent(coupleDaysOff)
 
@@ -507,7 +501,6 @@ describe('inside of form auth', () => {
       const check = verifyTimeSent(moreOneMonth)
 
       expect(check).toBe(false)
-
     })
 
     it('should fail if token is off by a few months in same year', () => {

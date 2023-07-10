@@ -258,11 +258,63 @@ async function authorizeUpdateComment(
   return errors
 }
 
+async function authorizeReplyForm(
+  commentId: number,
+  replyId: number,
+  postId: string,
+  reply: string,
+  isMainCommentReply: boolean
+): Promise<{ message: string }[]> {
+  const errors: { message: string }[] = []
+
+  const post = await Post.findById(postId)
+  if (!post) {
+    return [{ message: 'Post Does Not Exist' }]
+  }
+
+  const comment = await Post.findCommentById(commentId)
+  if (!comment) {
+    return [{ message: 'Comment Does Not Exist, Cannot Reply To It' }]
+  }
+
+  if (comment.postid !== post.id) {
+    errors.push({ message: 'Comment Exists Under Different Post' })
+  }
+
+  if (!isMainCommentReply) {
+    const reply = await Post.findReplyById(replyId)
+
+    if (!reply) {
+      return [{ message: 'Reply Does Not Exist' }]
+    }
+
+    if (reply.commentid !== commentId) {
+      errors.push({ message: 'Reply Is Under Different Comment' })
+    }
+
+    if (reply.postid !== post.id) {
+      errors.push({ message: 'Reply Is Under Different Post' })
+    }
+  }
+  else {
+    if (replyId !== commentId) {
+      errors.push({ message: 'Comment Should Be The Reply' })
+    }
+  }
+
+  if (reply.length < 4 || reply.length > 400) {
+    errors.push({ message: 'Reply Must Be 4 - 400 Characters Long' })
+  }
+
+  return errors
+}
+
 export {
   authorizeRegisterForm,
   authorizePostForm,
   authorizeCommentForm,
   authorizeUpdateForm,
   authorizeUpdateProfile,
-  authorizeUpdateComment
+  authorizeUpdateComment,
+  authorizeReplyForm
 }

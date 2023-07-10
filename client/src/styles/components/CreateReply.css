@@ -1,0 +1,32 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans&family=Playfair+Display&display=swap');
+
+.createreply--form {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.createreply--form-text {
+  background: rgba(128, 128, 128, 0.18);
+  color: white;
+  border: none;
+  border-bottom: 1px solid white;
+  padding: 5px;
+}
+
+.createreply--post-btn {
+  width: 50px;
+  border: none;
+  background-color: #3500d3;
+  color: white;
+  padding: 2px;
+  cursor: pointer;
+}
+
+.createreply--container textarea {
+  font-family: 'Open Sans', sans-serif;
+  width: 100%;
+  height: 50px;
+  resize: none;
+  white-space: pre-line;
+}

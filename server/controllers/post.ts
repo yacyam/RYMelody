@@ -1,6 +1,6 @@
 import { pool } from "../database/index"
 import * as Query from "../database/queries"
-import { HomePost, Post, Comment, Tags, RawComment } from "../database/Post"
+import { HomePost, Post, Comment, Tags, RawComment, Reply, RawReply } from "../database/Post"
 import { QueryResult } from "pg"
 
 /**
@@ -95,7 +95,17 @@ async function findById(id: string): Promise<Post | undefined> {
  */
 async function getComments(id: string): Promise<Comment[]> {
   const getComments: QueryResult = await pool.query(Query.getComments, [id])
-  return getComments.rows
+
+  const commentsWithReplies: Comment[] =
+    await Promise.all((getComments.rows as Comment[]).map(async (comment) => {
+      const replies: Reply[] = await getReplies(comment.id, comment.id)
+
+      return {
+        ...comment,
+        replies: replies
+      }
+    }))
+  return commentsWithReplies
 }
 
 /**
@@ -225,14 +235,58 @@ async function deleteComment(
   await pool.query(Query.deleteComment, [id])
 }
 
+async function getReplies(commentid: number, replyid: number): Promise<Reply[]> {
+
+  const currReplies: QueryResult = await pool.query(Query.getReplies, [commentid, replyid])
+
+  const obtainRestReplies =
+    await Promise.all((currReplies.rows as Reply[]).map(async (reply) => {
+      const nestedReplies: Reply[] = await getReplies(commentid, reply.id)
+
+      return {
+        ...reply,
+        replies: nestedReplies
+      }
+    }))
+
+  return obtainRestReplies
+}
+
+async function findReplyById(id: string | number): Promise<RawReply | undefined> {
+
+  const reply = await pool.query(Query.findReplyById, [id])
+
+  if (reply.rows.length === 0) {
+    return undefined
+  }
+
+  return reply.rows[0]
+}
+
+async function createReply(
+  userId: number,
+  commentId: number,
+  replyId: number,
+  postId: string | number,
+  reply: string
+): Promise<number> {
+
+  const newReplyId = await pool.query(Query.createReply, [userId, commentId, replyId, postId, reply])
+
+  return newReplyId.rows[0].id
+
+}
+
 export {
   getPosts,
   getAllLikes,
   getTags,
   createPost,
   createTags,
+  createReply,
   findById,
   findCommentById,
+  findReplyById,
   getComments,
   userLikedPost,
   createComment,

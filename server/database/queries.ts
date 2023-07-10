@@ -55,13 +55,15 @@ const getComments = "SELECT comments.id, comments.userId, username, comment FROM
 const didUserLikePost = "SELECT * FROM postlikes WHERE userId = $1 AND postId = $2"
 const getAllLikes = "SELECT COUNT(*) FROM postlikes WHERE postId = $1"
 const getTags = `SELECT ${tags} FROM posttags WHERE postId = $1`
+const getReplies = "SELECT postreply.id, postreply.userId, username, commentId, replyId, postId, reply FROM postreply JOIN users ON postreply.userId = users.id WHERE commentId = $1 AND replyId = $2"
+const findReplyById = "SELECT id, userId, commentId, replyId, postId, reply FROM postreply WHERE id = $1"
 
 const createPost = "INSERT INTO posts (userId, title, description, audio) VALUES ($1, $2, $3, $4) RETURNING id"
 const createComment = "INSERT INTO comments (postId, userId, comment) VALUES ($1, $2, $3) RETURNING id"
 const createLike = "INSERT INTO postlikes (postId, userId) VALUES ($1, $2)"
 const createDefaultTags = "INSERT INTO posttags (postId) VALUES ($1)"
 const createTags = `INSERT INTO posttags (postId, ${tags}) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`
-
+const createReply = "INSERT INTO postreply (userId, commentId, replyId, postId, reply) VALUES ($1, $2, $3, $4, $5) RETURNING id"
 
 const updateDescription = "UPDATE posts SET description = $1 WHERE id = $2"
 const updateComment = "UPDATE comments SET comment = $1 WHERE id = $2"
@@ -102,14 +104,17 @@ export {
   getAllLikes,
   findPostById,
   findCommentById,
+  findReplyById,
   getComments,
   getTags,
+  getReplies,
   didUserLikePost,
   createPost,
   createComment,
   createLike,
   createDefaultTags,
   createTags,
+  createReply,
   removeLike,
   deletePost,
   deleteComments,

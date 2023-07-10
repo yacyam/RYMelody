@@ -26,7 +26,8 @@ export interface Comment {
   id: number,
   userid: number,
   username: string,
-  comment: string
+  comment: string,
+  replies: Reply[]
 }
 
 export interface ModifyComment extends Comment {
@@ -42,4 +43,18 @@ export interface Tags {
   metal: boolean,
   jazz: boolean,
   classical: boolean
+}
+
+export interface RawReply {
+  id: number,
+  userid: number,
+  commentid: number,
+  replyid: number,
+  postid: number
+}
+
+export interface Reply extends RawReply {
+  username: string,
+  reply: string,
+  replies: Reply[]
 }
