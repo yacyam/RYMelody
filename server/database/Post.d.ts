@@ -26,8 +26,7 @@ export interface Comment {
   id: number,
   userid: number,
   username: string,
-  comment: string,
-  replies: Reply[]
+  comment: string
 }
 
 export interface ModifyComment extends Comment {
@@ -56,5 +55,4 @@ export interface RawReply {
 export interface Reply extends RawReply {
   username: string,
   reply: string,
-  replies: Reply[]
 }

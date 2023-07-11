@@ -28,7 +28,6 @@ export interface HighlightPost {
 
 export interface FullPost extends HighlightPost {
   audio: string,
-  comments: Comment[],
   tags: Tags
 }
 
@@ -45,6 +44,5 @@ export interface ReplyData {
   commentid: number,
   replyid: number,
   postid: number,
-  reply: string,
-  replies: ReplyData[]
+  reply: string
 }

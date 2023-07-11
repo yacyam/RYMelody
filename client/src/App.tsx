@@ -5,7 +5,7 @@ import Navbar from './components/Navbar'
 import CreatePost from './pages/CreatePost'
 import './styles/App.css'
 import Login from './pages/Login'
-import Post from './pages/Post'
+import Post from './pages/post/Post'
 import Profile from './pages/Profile'
 import NotFound from './pages/NotFound'
 

@@ -46,54 +46,6 @@
   max-height: 1.875rem;
 }
 
-
-.post--comment-form {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-bottom: 40px;
-}
-
-.post--comment-form button {
-  font-family: 'Open Sans', sans-serif;
-  color: white;
-  width: 120px;
-  height: 30px;
-  background-color: #3500d3;
-  outline: none;
-  border: none;
-  cursor: pointer;
-}
-
-.post--comment-form button:hover {
-  background-color: #5226d6;
-}
-
-::placeholder {
-  color: white;
-  opacity: 50%;
-}
-
-.post--comment-box {
-  padding: 5px;
-  font-family: 'Open Sans', sans-serif;
-  text-align: top;
-  height: 100px;
-  background: rgb(121, 121, 121);
-  border-bottom: 1px solid rgb(0, 0, 0);
-  color: white;
-  resize: none;
-}
-
-.post--notlogged-comment {
-  margin-bottom: 40px;
-}
-
-.post--all-comments-title {
-  border-bottom: 1px solid white;
-  margin-bottom: 10px;
-}
-
 .post--info {
   display: flex;
   align-items: center;

@@ -1,24 +1,21 @@
 import { useState } from "react";
-import { Comment, FullPostData } from "../interfaces/Post";
+import { Comment } from "../interfaces/Post";
 import "../styles/components/PostComment.css"
 import { Edit } from "./Edit";
 import Errors from "./Error";
 import { MsgErr } from "../interfaces/Error";
-import CreateReply from "./CreateReply";
-import Reply from "../pages/Reply";
+import Replies from "../pages/post/Replies";
 
 interface CommentSetter extends Comment {
-  updatePost: (arg: ((value: FullPostData | undefined) => FullPostData | undefined)) => void,
+  updateComments: (arg: ((value: Comment[]) => Comment[])) => void,
   postId: string | undefined
 }
-//need to give comments their own state
+
 export default function PostComment(props: CommentSetter) {
   const [isEditing, setIsEditing] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [updateCommentErrors, setUpdateCommentErrors] = useState<MsgErr>([])
   const [deleteCommentErrors, setDeleteCommentErrors] = useState<MsgErr>([])
-  const [replyErrors, setReplyErrors] = useState<MsgErr>([])
-  const [isReplying, setIsReplying] = useState(false)
 
   function gotoUserProfile(e: React.SyntheticEvent) {
     window.open(`http://localhost:5173/user/${props.userid}`, '_self')
@@ -51,10 +48,9 @@ export default function PostComment(props: CommentSetter) {
       setUpdateCommentErrors(errors)
     }
     else {
-      props.updatePost(oldPostData => {
-        if (!oldPostData) return oldPostData
+      props.updateComments(oldCommentData => {
 
-        const newCommentData = oldPostData.comments.map((oldComment) => {
+        const newCommentData = oldCommentData.map((oldComment) => {
           if (oldComment.id !== props.id) {
             return oldComment
           }
@@ -64,10 +60,7 @@ export default function PostComment(props: CommentSetter) {
           }
         })
 
-        return {
-          ...oldPostData,
-          comments: newCommentData
-        }
+        return newCommentData
       })
       setIsEditing(false)
     }
@@ -98,91 +91,16 @@ export default function PostComment(props: CommentSetter) {
       setDeleteCommentErrors(errors)
       setConfirmDelete(false)
     } else {
-      props.updatePost(oldPostData => {
-        if (!oldPostData) return oldPostData
+      props.updateComments(oldCommentData => {
 
-        const newCommentData = oldPostData.comments.filter((oldComment) => {
+        const newCommentData = oldCommentData.filter((oldComment) => {
           return oldComment.id !== props.id
         })
 
-        return {
-          ...oldPostData,
-          comments: newCommentData
-        }
+        return newCommentData
       })
     }
   }
-
-  async function submitReply(data: { text: string }): Promise<void> {
-    const replyData = {
-      commentId: props.id,
-      replyId: props.id,
-      reply: data.text,
-      isMainCommentReply: true
-    }
-
-    const res = await fetch(`http://localhost:3000/post/${props.postId}/reply`, {
-      method: 'POST',
-      'credentials': 'include',
-      body: JSON.stringify(replyData),
-      headers: { 'Content-Type': 'application/json' }
-    })
-
-    if (!res.ok) {
-      const errors = await res.json()
-      setReplyErrors(errors)
-    }
-    else {
-      const { newReplyId, userId, username }: { newReplyId: number, userId: number, username: string }
-        = await res.json()
-
-      props.updatePost(oldPostData => {
-        if (!oldPostData) return oldPostData
-
-        const updatedComments = oldPostData.comments.map((comment) => {
-          if (comment.id !== props.id || props.postId === undefined) {
-            return comment
-          }
-          const newReplies = [...comment.replies]
-
-          newReplies.push({
-            id: newReplyId,
-            userid: userId,
-            username,
-            commentid: props.id,
-            replyid: props.id,
-            postid: parseInt(props.postId),
-            reply: data.text,
-            replies: []
-          })
-
-          return {
-            ...comment,
-            replies: newReplies
-          }
-        })
-
-        return {
-          ...oldPostData,
-          comments: updatedComments
-        }
-      })
-    }
-  }
-
-  function setReplying() {
-    setIsReplying(prevReplying => !prevReplying)
-  }
-
-  const displayReplies = props.replies.map((reply) => {
-    return (
-      <Reply
-        key={reply.id}
-        {...reply}
-        leftMargin={5}
-      />
-    )
-  })
 
   return (
     <div className="comment--container">
@@ -203,31 +121,27 @@ export default function PostComment(props: CommentSetter) {
             <h4 className="comment--main-text">{props.comment}</h4>
           </div>
       }
-      <div className="comment--edit">
+      <div className="comment--edit-and-replies">
         {
           props.canModify &&
-          <>
+          <div className="comment--edit">
             <p onClick={setEditing}>{isEditing ? "Cancel" : "Edit"}</p>
             <p onClick={deleteComment}>{confirmDelete ? "Confirm?" : "Delete"}</p>
-          </>
+          </div>
         }
-        <p onClick={setReplying}>{isReplying ? "Cancel" : "Reply"}</p>
+        <Errors
+          errors={updateCommentErrors}
+        />
+        <Errors
+          errors={deleteCommentErrors}
+        />
+
+        <Replies
+          postId={props.postId}
+          commentId={props.id}
+        />
       </div>
 
-      {isReplying && <CreateReply updateReply={submitReply} />}
-
-      <Errors
-        errors={updateCommentErrors}
-      />
-      <Errors
-        errors={deleteCommentErrors}
-      />
-      <Errors
-        errors={replyErrors}
-      />
-      <div className="postcomment--replies">
-        {displayReplies}
-      </div>
     </div>
   )
 }

@@ -1,31 +1,19 @@
 import { useState } from "react";
 import { ReplyData } from "../interfaces/Post";
-import CreateReply from "../components/CreateReply";
+import CreateReply from "./CreateReply";
 import { MsgErr } from "../interfaces/Error";
-import Errors from "../components/Error";
+import Errors from "./Error";
+import "../styles/components/Reply.css"
 
 interface PropTypes extends ReplyData {
-  leftMargin: number
+  updateReplies: (arg: (value: ReplyData[]) => ReplyData[]) => void
 }
 
-// instead of making one huge state, can get everything
-// then create separate states for whats needed
 export default function Reply(props: PropTypes) {
   const [replyDescription, setReplyDescription] = useState(props.reply)
-  const [repliesData, setRepliesData] = useState(props.replies)
+
   const [replyErrors, setReplyErrors] = useState<MsgErr>([])
   const [isReplying, setIsReplying] = useState(false)
-
-
-  const replyElements = repliesData.map((reply) => {
-    return (
-      <Reply
-        key={reply.id}
-        {...reply}
-        leftMargin={props.leftMargin + 5}
-      />
-    )
-  })
 
   async function submitReply(data: { text: string }): Promise<void> {
     const replyData = {
@@ -50,7 +38,7 @@ export default function Reply(props: PropTypes) {
       const { newReplyId, userId, username }: { newReplyId: number, userId: number, username: string }
         = await res.json()
 
-      setRepliesData(oldReplyData => {
+      props.updateReplies(oldReplyData => {
 
         const newReplies = [...oldReplyData]
 
@@ -62,7 +50,6 @@ export default function Reply(props: PropTypes) {
           replyid: props.id,
           postid: props.postid,
           reply: data.text,
-          replies: []
         })
 
         return newReplies
@@ -75,17 +62,16 @@ export default function Reply(props: PropTypes) {
   }
 
   return (
-    <div style={{ marginLeft: `${props.leftMargin}px` }}>
-      <p>{props.username}</p>
-      <p>{replyDescription}</p>
-      <div>
-        {isReplying && <CreateReply updateReply={submitReply} />}
+    <div className="reply--container">
+      <p className="reply--username user-link">{props.username}</p>
+      <p className="reply--description">{replyDescription}</p>
+      <div className="reply--create">
         <p onClick={setReplying}>{isReplying ? "Cancel" : "Reply"}</p>
+        {isReplying && <CreateReply updateReply={submitReply} />}
         <Errors
           errors={replyErrors}
         />
       </div>
-      {replyElements}
     </div>
   )
 }

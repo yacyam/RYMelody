@@ -90,7 +90,6 @@ router.get('/:id', async (req, res) => {
     if (!post) {
       return res.sendStatus(404)
     }
-    const allComments = await Post.getComments(postId)
     const allLikes = await Post.getAllLikes(postId)
     const allTags = await Post.getTags(postId)
     let isLikedByUser = false
@@ -101,17 +100,41 @@ router.get('/:id', async (req, res) => {
       canModify = post.userid === userId
     }
 
-    const allCommentsModCheck = checkIfModifiable(allComments, userId)
-
     res.status(200).send({
       ...post,
-      comments: allCommentsModCheck,
       tags: allTags,
       amountLikes: allLikes,
       isPostLiked: isLikedByUser,
       canModify: canModify
     })
   } catch (err) {
+    res.status(500).send(INTERNAL_ERR_MSG)
+  }
+})
+
+router.get('/:id/comments', async (req, res) => {
+  const postId = req.params.id
+  const userId = 'user' in req ? (req.user as User).id : undefined
+  try {
+
+    const allComments = await Post.getComments(postId)
+    const allCommentsModCheck = checkIfModifiable(allComments, userId)
+    res.status(200).send({ comments: allCommentsModCheck })
+
+  } catch (err) {
+    res.status(500).send(INTERNAL_ERR_MSG)
+  }
+})
+
+router.get('/:id/comment/:comid/replies', async (req, res) => {
+  const commentId = req.params.comid
+
+  try {
+    const replies = await Post.getReplies(commentId)
+
+    res.status(200).send({ replies: replies })
+  }
+  catch (err) {
     res.status(500).send(INTERNAL_ERR_MSG)
   }
 })

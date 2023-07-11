@@ -55,7 +55,7 @@ const getComments = "SELECT comments.id, comments.userId, username, comment FROM
 const didUserLikePost = "SELECT * FROM postlikes WHERE userId = $1 AND postId = $2"
 const getAllLikes = "SELECT COUNT(*) FROM postlikes WHERE postId = $1"
 const getTags = `SELECT ${tags} FROM posttags WHERE postId = $1`
-const getReplies = "SELECT postreply.id, postreply.userId, username, commentId, replyId, postId, reply FROM postreply JOIN users ON postreply.userId = users.id WHERE commentId = $1 AND replyId = $2"
+const getReplies = "SELECT postreply.id, postreply.userId, username, commentId, replyId, postId, reply FROM postreply JOIN users ON postreply.userId = users.id WHERE commentId = $1 ORDER BY time_posted ASC"
 const findReplyById = "SELECT id, userId, commentId, replyId, postId, reply FROM postreply WHERE id = $1"
 
 const createPost = "INSERT INTO posts (userId, title, description, audio) VALUES ($1, $2, $3, $4) RETURNING id"

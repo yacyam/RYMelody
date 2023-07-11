@@ -1,0 +1,11 @@
+.replies--all {
+  border-left: 0.1px solid rgb(152, 165, 252);
+  padding-left: 15px;
+  display: flex;
+  flex-direction: column;
+}
+
+.replies--create {
+  color: gray;
+  cursor: pointer;
+}

@@ -96,16 +96,7 @@ async function findById(id: string): Promise<Post | undefined> {
 async function getComments(id: string): Promise<Comment[]> {
   const getComments: QueryResult = await pool.query(Query.getComments, [id])
 
-  const commentsWithReplies: Comment[] =
-    await Promise.all((getComments.rows as Comment[]).map(async (comment) => {
-      const replies: Reply[] = await getReplies(comment.id, comment.id)
-
-      return {
-        ...comment,
-        replies: replies
-      }
-    }))
-  return commentsWithReplies
+  return getComments.rows
 }
 
 /**
@@ -235,21 +226,11 @@ async function deleteComment(
   await pool.query(Query.deleteComment, [id])
 }
 
-async function getReplies(commentid: number, replyid: number): Promise<Reply[]> {
+async function getReplies(commentid: string | number): Promise<Reply[]> {
 
-  const currReplies: QueryResult = await pool.query(Query.getReplies, [commentid, replyid])
+  const currReplies: QueryResult = await pool.query(Query.getReplies, [commentid])
 
-  const obtainRestReplies =
-    await Promise.all((currReplies.rows as Reply[]).map(async (reply) => {
-      const nestedReplies: Reply[] = await getReplies(commentid, reply.id)
-
-      return {
-        ...reply,
-        replies: nestedReplies
-      }
-    }))
-
-  return obtainRestReplies
+  return currReplies.rows
 }
 
 async function findReplyById(id: string | number): Promise<RawReply | undefined> {
@@ -288,6 +269,7 @@ export {
   findCommentById,
   findReplyById,
   getComments,
+  getReplies,
   userLikedPost,
   createComment,
   likePost,

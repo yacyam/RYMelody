@@ -1,22 +1,18 @@
 import { useParams } from "react-router-dom"
-import "../styles/pages/Post.css"
-import { useContext, useEffect, useState } from "react"
-import { FullPostData, Tags } from "../interfaces/Post"
-import AuthContext from "../context/AuthContext"
-import PostComment from "../components/PostComment"
-import { Edit } from "../components/Edit"
-import { MsgErr } from "../interfaces/Error"
-import Errors from "../components/Error"
+import "../../styles/pages/Post.css"
+import { useEffect, useState } from "react"
+import { FullPostData, Tags } from "../../interfaces/Post"
+import { Edit } from "../../components/Edit"
+import { MsgErr } from "../../interfaces/Error"
+import Errors from "../../components/Error"
+import Comments from "./Comments"
 
 export default function Post() {
   const { id } = useParams()
-  const { isLoggedIn } = useContext(AuthContext)
-  const [formData, setFormData] = useState({ comment: "" })
-  const [commentErrors, setCommentErrors] = useState<MsgErr>([])
   const [editDescErrors, setEditDescErrors] = useState<MsgErr>([])
   const [deletePostErrors, setDeletePostErrors] = useState<MsgErr>([])
   const [doesNotExist, setDoesNotExist] = useState<boolean>(false)
-  const [fullPostData, setFullPostData] = useState<FullPostData | undefined>(undefined)
+  const [postData, setPostData] = useState<FullPostData | undefined>(undefined)
   const [isEditing, setIsEditing] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
 
@@ -31,12 +27,12 @@ export default function Post() {
         }
         throw new Error('Post Does Not Exist')
       })
-      .then(data => setFullPostData(data))
+      .then(data => setPostData(data))
       .catch(() => setDoesNotExist(true))
-  }, [])
+  }, [id])
 
   async function likeOrUnlikePost(): Promise<void> {
-    if (!fullPostData) return
+    if (!postData) return
 
     const res = await fetch(`http://localhost:3000/post/${id}/like`, {
       method: 'POST',
@@ -44,7 +40,7 @@ export default function Post() {
     })
 
     if (res.ok) {
-      setFullPostData(oldPostData => {
+      setPostData(oldPostData => {
         if (!oldPostData) return oldPostData
 
         const isLiked = !oldPostData.isPostLiked
@@ -74,7 +70,7 @@ export default function Post() {
       setEditDescErrors(errs)
     }
     else {
-      setFullPostData(oldPostData => {
+      setPostData(oldPostData => {
         if (!oldPostData) return oldPostData
 
         return {
@@ -132,49 +128,49 @@ export default function Post() {
   }
 
   function createPostLayout() {
-    if (!fullPostData) return undefined
+    if (!postData) return undefined
 
-    const postLikedStyle = fullPostData.isPostLiked ? "liked" : "like"
-    const fullGenres = createTagString(fullPostData.tags)
+    const postLikedStyle = postData.isPostLiked ? "liked" : "like"
+    const fullGenres = createTagString(postData.tags)
 
     return (
       <div className="post--main-container">
         <div className="post--main-top-portion">
           <div className="post--title-and-tags">
-            <h3>{fullPostData.title}</h3>
+            <h3>{postData.title}</h3>
             {fullGenres && <p>○</p>}
             <p>{fullGenres}</p>
           </div>
           <p
             className="user-link"
-            onClick={(e: React.SyntheticEvent) => gotoUserProfile(e, fullPostData.userid)}
+            onClick={(e: React.SyntheticEvent) => gotoUserProfile(e, postData.userid)}
           >
-            {fullPostData.username}
+            {postData.username}
           </p>
 
         </div>
 
         {isEditing ?
           <>
-            <Edit text={fullPostData.description} updateFunc={updateDescription} />
+            <Edit text={postData.description} updateFunc={updateDescription} />
 
             <Errors
               errors={editDescErrors}
             />
           </> :
-          <p className="post--desc-text">{fullPostData.description}</p>
+          <p className="post--desc-text">{postData.description}</p>
         }
 
-        <audio className="post--audio" controls src={fullPostData.audio} />
+        <audio className="post--audio" controls src={postData.audio} />
 
         <div className="post--info">
           <button className={`like--select ${postLikedStyle}`} onClick={likeOrUnlikePost}>
             Like
           </button>
-          <p className="post--likes">+{fullPostData.amountLikes}</p>
+          <p className="post--likes">+{postData.amountLikes}</p>
         </div>
 
-        {fullPostData.canModify &&
+        {postData.canModify &&
           <div className="post--edit">
             <p onClick={setEditing}>{isEditing ? "Cancel" : "Edit"}</p>
             <p onClick={deletePost}>{confirmDelete ? "Confirm?" : "Delete"}</p>
@@ -188,65 +184,7 @@ export default function Post() {
     )
   }
 
-  function createCommentLayout() {
-    if (!fullPostData) return undefined
-
-    return fullPostData.comments.map((comment) => {
-      return <PostComment
-        key={comment.id}
-        {...comment}
-        updatePost={setFullPostData}
-        postId={id}
-      />
-    })
-  }
-
   const postElement = createPostLayout()
-  const commentElement = createCommentLayout()
-
-  function updateComment(e: React.SyntheticEvent): void {
-    const { name, value } = e.target as HTMLInputElement
-
-    setFormData(oldFormData => ({ ...oldFormData, [name]: value }))
-    setCommentErrors([])
-  }
-
-  async function submitComment(e: React.SyntheticEvent): Promise<void> {
-    e.preventDefault()
-
-    const res = await fetch(`http://localhost:3000/post/${id}/comment`, {
-      method: 'POST',
-      'credentials': 'include',
-      body: JSON.stringify(formData),
-      headers: { 'Content-Type': 'application/json' }
-    })
-
-    if (!res.ok) {
-      const errs = await res.json()
-      setCommentErrors(errs)
-    }
-    else {
-      const { id, userId, username } = await res.json()
-
-      setFullPostData(oldPostData => {
-        if (!oldPostData) return oldPostData
-
-        const commentsCopy = [...oldPostData.comments]
-        commentsCopy.push({
-          id: id,
-          userid: userId,
-          username: username,
-          comment: formData.comment,
-          replies: [],
-          canModify: true
-        })
-        return {
-          ...oldPostData,
-          comments: commentsCopy
-        }
-      })
-    }
-  }
 
   return (
     <>
@@ -255,33 +193,7 @@ export default function Post() {
         <div className="post--container">
           {postElement}
 
-          {
-            !isLoggedIn ?
-              <h5 className="post--notlogged-comment">
-                Must be Logged in to Comment on Post
-              </h5>
-              :
-              <form className="post--comment-form" onSubmit={submitComment}>
-                <legend>Leave a Comment on this Post</legend>
-                <textarea
-                  name="comment"
-                  className="post--comment-box"
-                  placeholder="Comment"
-                  onChange={updateComment}
-                  value={formData.comment}
-                />
-
-                <Errors
-                  errors={commentErrors}
-                />
-
-                <button>Post Comment</button>
-              </form>
-          }
-          <div className="post--all-comments">
-            <h2 className="post--all-comments-title">Comments</h2>
-            {commentElement}
-          </div>
+          {postData && <Comments postId={`${postData.id}`} />}
         </div>
       }
 
