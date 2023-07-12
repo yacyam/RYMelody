@@ -1,6 +1,6 @@
 import { pool } from "../database/index"
 import * as Query from "../database/queries"
-import { HomePost, Post, Comment, Tags, RawComment, Reply, RawReply } from "../database/Post"
+import { HomePost, Post, Comment, Tags, RawComment, Reply, RawReply, ReplyTo } from "../database/Post"
 import { QueryResult } from "pg"
 
 /**
@@ -226,7 +226,7 @@ async function deleteComment(
   await pool.query(Query.deleteComment, [id])
 }
 
-async function getReplies(commentid: string | number): Promise<Reply[]> {
+async function getReplies(commentid: string | number): Promise<ReplyTo[]> {
 
   const currReplies: QueryResult = await pool.query(Query.getReplies, [commentid])
 
@@ -247,12 +247,14 @@ async function findReplyById(id: string | number): Promise<RawReply | undefined>
 async function createReply(
   userId: number,
   commentId: number,
-  replyId: number,
+  replyId: number | undefined,
   postId: string | number,
   reply: string
 ): Promise<number> {
 
-  const newReplyId = await pool.query(Query.createReply, [userId, commentId, replyId, postId, reply])
+  const replyID = replyId === undefined ? null : replyId
+
+  const newReplyId = await pool.query(Query.createReply, [userId, commentId, replyID, postId, reply])
 
   return newReplyId.rows[0].id
 

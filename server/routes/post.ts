@@ -126,19 +126,6 @@ router.get('/:id/comments', async (req, res) => {
   }
 })
 
-router.get('/:id/comment/:comid/replies', async (req, res) => {
-  const commentId = req.params.comid
-
-  try {
-    const replies = await Post.getReplies(commentId)
-
-    res.status(200).send({ replies: replies })
-  }
-  catch (err) {
-    res.status(500).send(INTERNAL_ERR_MSG)
-  }
-})
-
 router.post('/:id/comment', async (req, res) => {
   if (!('user' in req)) {
     return res.status(401).send([{ message: 'Must Be Logged In To Post Comment' }])
@@ -289,9 +276,22 @@ router.delete('/:id/comment', async (req, res) => {
 
 })
 
+router.get('/:id/comment/:comid/replies', async (req, res) => {
+  const commentId = req.params.comid
+
+  try {
+    const replies = await Post.getReplies(commentId)
+
+    res.status(200).send({ replies: replies })
+  }
+  catch (err) {
+    res.status(500).send(INTERNAL_ERR_MSG)
+  }
+})
+
 router.post('/:id/reply', async (req, res) => {
   if (!('user' in req)) {
-    res.status(401).send([{ message: 'Must Be Logged In To Reply' }])
+    return res.status(401).send([{ message: 'Must Be Logged In To Reply' }])
   }
   const userId = (req.user as User).id
   const { commentId, replyId, reply, isMainCommentReply } = req.body

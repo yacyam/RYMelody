@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { Comment } from "../interfaces/Post";
+import { Comment, ReplyData, ReplyToData } from "../interfaces/Post";
 import "../styles/components/PostComment.css"
 import { Edit } from "./Edit";
 import Errors from "./Error";
 import { MsgErr } from "../interfaces/Error";
 import Replies from "../pages/post/Replies";
+import CreateReply from "./CreateReply";
 
 interface CommentSetter extends Comment {
   updateComments: (arg: ((value: Comment[]) => Comment[])) => void,
@@ -16,6 +17,10 @@ export default function PostComment(props: CommentSetter) {
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [updateCommentErrors, setUpdateCommentErrors] = useState<MsgErr>([])
   const [deleteCommentErrors, setDeleteCommentErrors] = useState<MsgErr>([])
+  const [repliesData, setRepliesData] = useState<ReplyToData[]>([])
+  const [isShowingReplies, setIsShowingReplies] = useState(false)
+  const [isReplying, setIsReplying] = useState(false)
+  const [replyErrors, setReplyErrors] = useState<MsgErr>([])
 
   function gotoUserProfile(e: React.SyntheticEvent) {
     window.open(`http://localhost:5173/user/${props.userid}`, '_self')
@@ -25,6 +30,15 @@ export default function PostComment(props: CommentSetter) {
   function setEditing() {
     setIsEditing(oldIsEditing => !oldIsEditing)
     setUpdateCommentErrors([])
+  }
+
+  function setShowReply() {
+    setIsShowingReplies(prevShowing => !prevShowing)
+  }
+
+  function setReplying() {
+    setIsReplying(prevReplying => !prevReplying)
+    setReplyErrors([])
   }
 
   async function updateComment(data: { text: string }) {
@@ -102,6 +116,53 @@ export default function PostComment(props: CommentSetter) {
     }
   }
 
+  async function submitReply(data: { text: string }): Promise<void> {
+    const postId: string = props.postId || "-1"
+
+    const replyData = {
+      commentId: props.id,
+      reply: data.text,
+      isMainCommentReply: true
+    }
+
+    const res = await fetch(`http://localhost:3000/post/${postId}/reply`, {
+      method: 'POST',
+      'credentials': 'include',
+      body: JSON.stringify(replyData),
+      headers: { 'Content-Type': 'application/json' }
+    })
+
+    if (!res.ok) {
+      const errors = await res.json()
+      setReplyErrors(errors)
+    }
+    else {
+      const { newReplyId, userId, username }: { newReplyId: number, userId: number, username: string }
+        = await res.json()
+
+      setRepliesData(oldRepliesData => {
+        const newReplies = [...oldRepliesData]
+
+        newReplies.push({
+          id: newReplyId,
+          userid: userId,
+          username,
+          commentid: props.id,
+          replyid: null,
+          postid: parseInt(postId),
+          reply: data.text,
+          rpreply: null,
+          rpuserid: null,
+          rpusername: null
+        })
+
+        return newReplies
+      })
+
+      setIsShowingReplies(true)
+    }
+  }
+
   return (
     <div className="comment--container">
       <p
@@ -122,13 +183,21 @@ export default function PostComment(props: CommentSetter) {
           </div>
       }
       <div className="comment--edit-and-replies">
-        {
-          props.canModify &&
-          <div className="comment--edit">
-            <p onClick={setEditing}>{isEditing ? "Cancel" : "Edit"}</p>
-            <p onClick={deleteComment}>{confirmDelete ? "Confirm?" : "Delete"}</p>
-          </div>
-        }
+        <div className="comment--edit">
+          {
+            props.canModify &&
+            <>
+              <p onClick={setEditing}>{isEditing ? "Cancel" : "Edit"}</p>
+              <p onClick={deleteComment}>{confirmDelete ? "Confirm?" : "Delete"}</p>
+            </>
+          }
+          <p onClick={setReplying}>{isReplying ? "Cancel" : "Reply"}</p>
+          <p onClick={setShowReply}>{isShowingReplies ? "Hide" : "Show"} Replies</p>
+
+        </div>
+
+        {isReplying && <CreateReply updateReply={submitReply} />}
+
         <Errors
           errors={updateCommentErrors}
         />
@@ -136,10 +205,18 @@ export default function PostComment(props: CommentSetter) {
           errors={deleteCommentErrors}
         />
 
-        <Replies
-          postId={props.postId}
-          commentId={props.id}
+        <Errors
+          errors={replyErrors}
         />
+
+        {isShowingReplies &&
+          <Replies
+            postId={props.postId}
+            commentId={props.id}
+            replies={repliesData}
+            setReplies={setRepliesData}
+          />
+        }
       </div>
 
     </div>

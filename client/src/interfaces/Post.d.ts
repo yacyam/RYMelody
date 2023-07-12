@@ -42,7 +42,13 @@ export interface ReplyData {
   userid: number,
   username: string,
   commentid: number,
-  replyid: number,
+  replyid: number | null,
   postid: number,
   reply: string
+}
+
+export interface ReplyToData extends ReplyData {
+  rpuserid: number | null,
+  rpusername: string | null,
+  rpreply: string | null
 }

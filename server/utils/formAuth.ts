@@ -260,7 +260,7 @@ async function authorizeUpdateComment(
 
 async function authorizeReplyForm(
   commentId: number,
-  replyId: number,
+  replyId: number | undefined,
   postId: string,
   reply: string,
   isMainCommentReply: boolean
@@ -282,6 +282,9 @@ async function authorizeReplyForm(
   }
 
   if (!isMainCommentReply) {
+    if (!replyId) {
+      return [{ message: 'Reply Does Not Exist' }]
+    }
     const reply = await Post.findReplyById(replyId)
 
     if (!reply) {
@@ -294,11 +297,6 @@ async function authorizeReplyForm(
 
     if (reply.postid !== post.id) {
       errors.push({ message: 'Reply Is Under Different Post' })
-    }
-  }
-  else {
-    if (replyId !== commentId) {
-      errors.push({ message: 'Comment Should Be The Reply' })
     }
   }
 

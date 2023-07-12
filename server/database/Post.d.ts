@@ -48,11 +48,17 @@ export interface RawReply {
   id: number,
   userid: number,
   commentid: number,
-  replyid: number,
+  replyid: number | null,
   postid: number
 }
 
 export interface Reply extends RawReply {
   username: string,
   reply: string,
+}
+
+export interface ReplyTo extends Reply {
+  rpuserid: number | null,
+  rpusername: string | null,
+  rpreply: string | null
 }
