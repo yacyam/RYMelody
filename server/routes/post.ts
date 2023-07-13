@@ -326,7 +326,7 @@ router.put('/:id/reply', async (req, res) => {
     return res.status(401).send([{ message: 'Must Be Logged In To Edit Reply' }])
   }
   if (!(req.user as User).verified) {
-    return res.status(401).send([{ message: 'Must Be Verified To Delete Comment' }])
+    return res.status(401).send([{ message: 'Must Be Verified To Edit Reply' }])
   }
   const userId = (req.user as User).id
   const postId = req.params.id
@@ -351,7 +351,7 @@ router.delete('/:id/reply', async (req, res) => {
     return res.status(401).send([{ message: 'Must Be Logged In To Delete Reply' }])
   }
   if (!(req.user as User).verified) {
-    return res.status(401).send([{ message: 'Must Be Verified To Delete Comment' }])
+    return res.status(401).send([{ message: 'Must Be Verified To Delete Reply' }])
   }
   const userId = (req.user as User).id
   const postId = req.params.id

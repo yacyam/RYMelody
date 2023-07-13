@@ -57,6 +57,11 @@ export interface Reply extends RawReply {
   reply: string,
 }
 
+/**
+ * @interface rpuserid User Id of Original Replier That Current Reply is Replying To
+ * @interface rpusername Username of Original Replier That Current Reply is Replying To
+ * @interface rpreply Original Reply That Current Reply is Replying To
+ */
 export interface ReplyTo extends Reply {
   rpuserid: number | null,
   rpusername: string | null,

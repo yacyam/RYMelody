@@ -140,7 +140,7 @@ async function updateDescription(postId: string, text: string): Promise<void> {
   await pool.query(Query.updateDescription, [text, postId])
 }
 
-//Might have to delete comment likes as well or replies if I add them
+//Might have to delete comment likes as well if I add them
 /**
  * Deletes all post data associated with the post id. Removes comments, likes,
  * and tags along with the main post.
@@ -151,6 +151,7 @@ async function deletePost(postId: string): Promise<void> {
   await pool.query(Query.deleteComments, [postId])
   await pool.query(Query.deleteLikes, [postId])
   await pool.query(Query.deleteTags, [postId])
+  await pool.query(Query.deleteRepliesFromPost, [postId])
 }
 
 /**
@@ -219,13 +220,23 @@ async function updateComment(
 
 }
 
-//If i add replies need to also delete them
+/**
+ * Deletes Comment and Associated Replies
+ * @param id Id Of Comment
+ */
 async function deleteComment(
   id: string | number
 ): Promise<void> {
-  await pool.query(Query.deleteComment, [id])
+  await pool.query(Query.deleteComment, [id]);
+  await pool.query(Query.deleteRepliesFromComment, [id])
 }
 
+/**
+ * Obtains All Reply Information Associated With Comment. Each Reply Contains
+ * Information About Who 
+ * @param commentid 
+ * @returns Information About Each Reply Associated with Comment
+ */
 async function getReplies(commentid: string | number): Promise<ReplyTo[]> {
 
   const currReplies: QueryResult = await pool.query(Query.getReplies, [commentid])
@@ -233,6 +244,11 @@ async function getReplies(commentid: string | number): Promise<ReplyTo[]> {
   return currReplies.rows
 }
 
+/**
+ * Obtains Information About Reply From ID
+ * @param id 
+ * @returns Basic Information About Reply, or undefined if Reply Does Not Exist
+ */
 async function findReplyById(id: string | number): Promise<RawReply | undefined> {
 
   const reply = await pool.query(Query.findReplyById, [id])
@@ -244,6 +260,17 @@ async function findReplyById(id: string | number): Promise<RawReply | undefined>
   return reply.rows[0]
 }
 
+/**
+ * Creates a New Reply Under A Specified Comment. Can Either Reply to Main Comment
+ * or Another Reply Under Main Comment
+ * @param userId 
+ * @param commentId 
+ * @param replyId ID of Reply That The Currently Created Reply is Replying to.
+ * If undefined, Currently Created Reply is Directly Replying to Main Comment.
+ * @param postId 
+ * @param reply 
+ * @returns ID of Newly Created Reply
+ */
 async function createReply(
   userId: number,
   commentId: number,
@@ -260,10 +287,20 @@ async function createReply(
 
 }
 
+/**
+ * Updates Reply with New Text.
+ * @param id 
+ * @param reply 
+ */
 async function updateReply(id: number | string, reply: string): Promise<void> {
   await pool.query(Query.updateReply, [reply, id])
 }
 
+/**
+ * Deletes Reply with Associated ID. Does not nullify Reply ID of other Replies 
+ * Replying to the Currently Deleted Reply.
+ * @param id 
+ */
 async function deleteReply(id: number | string): Promise<void> {
   await pool.query(Query.deleteReply, [id])
 }

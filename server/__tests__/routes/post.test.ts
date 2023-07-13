@@ -1005,4 +1005,154 @@ describe('inside of post endpoint', () => {
       expect(PostController.createReply).toBeCalledTimes(1)
     })
   })
+
+  const fakeEditReply = {
+    ...fakeReply,
+    commentId: fakeReply.commentid,
+    replyId: fakeReply.id,
+    text: "abcdefgh",
+  }
+
+  const editAuthArgs = (postId: string) => {
+    return [
+      fakeEditReply.id,
+      fakeEditReply.commentid,
+      postId,
+      fakeEditReply.userid,
+      fakeEditReply.text
+    ]
+  }
+  describe('when updating a reply', () => {
+    it('should fail if user is not logged in', async () => {
+      const res = await request(app).put('/post/4/reply')
+
+      expect(res.status).toBe(401)
+      expect(res.body).toEqual([{ message: 'Must Be Logged In To Edit Reply' }])
+    })
+
+    it('should fail if user is not verified', async () => {
+      (UserController.findById as jest.Mock).mockReturnValueOnce({ ...fakeUser, verified: false })
+      const res = await user.put('/post/4/reply')
+
+      expect(res.status).toBe(401)
+      expect(res.body).toEqual([{ message: 'Must Be Verified To Edit Reply' }])
+    })
+
+    jest.spyOn(Auth, 'authorizeUpdateReply')
+
+    it('should fail if authorizing edit form errors out', async () => {
+      (Auth.authorizeUpdateReply as jest.Mock).mockImplementationOnce(() => { throw new Error() })
+      const res = await user.put('/post/4/reply').send(fakeEditReply)
+
+      expect(res.status).toBe(500)
+      expect(res.body).toEqual(INTERNAL_ERR_MSG)
+      expect(Auth.authorizeUpdateReply).toBeCalledTimes(1)
+      expect(Auth.authorizeUpdateReply).toBeCalledWith(...editAuthArgs("4"))
+    })
+
+    it('should fail if authorizing edit form fails', async () => {
+      (Auth.authorizeUpdateReply as jest.Mock).mockReturnValueOnce([{ message: 'Reply Auth Failed' }])
+      const res = await user.put('/post/10/reply').send(fakeEditReply)
+
+      expect(res.status).toBe(400)
+      expect(res.body).toEqual([{ message: 'Reply Auth Failed' }])
+      expect(Auth.authorizeUpdateReply).toBeCalledTimes(1)
+      expect(Auth.authorizeUpdateReply).toBeCalledWith(...editAuthArgs("10"))
+    })
+
+    it('should fail if updating reply with controller fails', async () => {
+      (Auth.authorizeUpdateReply as jest.Mock).mockReturnValue([]);
+      (PostController.updateReply as jest.Mock).mockImplementationOnce(() => { throw new Error() })
+
+      const res = await user.put('/post/5/reply').send(fakeEditReply)
+
+      expect(res.status).toBe(500)
+      expect(res.body).toEqual(INTERNAL_ERR_MSG)
+      expect(Auth.authorizeUpdateReply).toBeCalledTimes(1)
+      expect(Auth.authorizeUpdateReply).toBeCalledWith(...editAuthArgs("5"))
+      expect(PostController.updateReply).toBeCalledTimes(1)
+      expect(PostController.updateReply).toBeCalledWith(fakeEditReply.replyId, fakeEditReply.text)
+    })
+
+    it('should pass if all fields are inputted correctly', async () => {
+      const res = await user.put('/post/12/reply').send(fakeEditReply)
+
+      expect(res.status).toBe(200)
+      expect(Auth.authorizeUpdateReply).toBeCalledTimes(1)
+      expect(PostController.updateReply).toBeCalledTimes(1)
+    })
+  })
+
+  const deleteAuthArgs = (postId: string) => {
+    return [
+      fakeEditReply.id,
+      fakeEditReply.commentid,
+      postId,
+      fakeEditReply.userid,
+    ]
+  }
+
+  describe('when deleting a reply', () => {
+    it('should fail if user is not logged in', async () => {
+      const res = await request(app).delete('/post/4/reply')
+
+      expect(res.status).toBe(401)
+      expect(res.body).toEqual([{ message: 'Must Be Logged In To Delete Reply' }])
+    })
+
+    it('should fail if user is not verified', async () => {
+      (UserController.findById as jest.Mock).mockReturnValueOnce({ ...fakeUser, verified: false })
+      const res = await user.delete('/post/4/reply')
+
+      expect(res.status).toBe(401)
+      expect(res.body).toEqual([{ message: 'Must Be Verified To Delete Reply' }])
+    })
+
+    jest.spyOn(Auth, 'authorizeDeleteReply')
+    it('should fail if authorizing delete errors out', async () => {
+      (Auth.authorizeDeleteReply as jest.Mock).mockImplementationOnce(() => { throw new Error() })
+
+      const res = await user.delete('/post/5/reply').send(fakeEditReply)
+
+      expect(res.status).toBe(500)
+      expect(res.body).toEqual(INTERNAL_ERR_MSG)
+      expect(Auth.authorizeDeleteReply).toBeCalledTimes(1)
+      expect(Auth.authorizeDeleteReply).toBeCalledWith(...deleteAuthArgs("5"))
+    })
+
+    it('should fail if authorizing delete fails', async () => {
+      (Auth.authorizeDeleteReply as jest.Mock).mockReturnValueOnce([{ message: 'Reply Delete Auth Failed' }])
+
+      const res = await user.delete('/post/5/reply').send(fakeEditReply)
+
+      expect(res.status).toBe(400)
+      expect(res.body).toEqual([{ message: 'Reply Delete Auth Failed' }])
+      expect(Auth.authorizeDeleteReply).toBeCalledTimes(1)
+      expect(Auth.authorizeDeleteReply).toBeCalledWith(...deleteAuthArgs("5"))
+    })
+
+    it('should fail if deleting reply with controller fails', async () => {
+      (Auth.authorizeDeleteReply as jest.Mock).mockReturnValue([]);
+      (PostController.deleteReply as jest.Mock).mockImplementationOnce(() => { throw new Error() })
+
+      const res = await user.delete('/post/2/reply').send(fakeEditReply)
+
+      expect(res.status).toBe(500)
+      expect(res.body).toEqual(INTERNAL_ERR_MSG)
+      expect(Auth.authorizeDeleteReply).toBeCalledTimes(1)
+      expect(Auth.authorizeDeleteReply).toBeCalledWith(...deleteAuthArgs("2"))
+      expect(PostController.deleteReply).toBeCalledTimes(1)
+      expect(PostController.deleteReply).toBeCalledWith(fakeEditReply.replyId)
+    })
+
+    it('should pass if all fields are inputted correctly', async () => {
+      const res = await user.delete('/post/4/reply').send(fakeEditReply)
+
+      expect(res.status).toBe(200)
+      expect(Auth.authorizeDeleteReply).toBeCalledTimes(1)
+      expect(Auth.authorizeDeleteReply).toBeCalledWith(...deleteAuthArgs("4"))
+      expect(PostController.deleteReply).toBeCalledTimes(1)
+      expect(PostController.deleteReply).toBeCalledWith(fakeEditReply.replyId)
+    })
+  })
 })

@@ -88,6 +88,9 @@ const deleteLikes = "DELETE FROM postlikes WHERE postId = $1"
 const deleteTags = "DELETE FROM posttags WHERE postId = $1"
 const deleteReply = "DELETE FROM postreply WHERE id = $1"
 
+const deleteRepliesFromComment = "DELETE FROM postreply WHERE commentId = $1"
+const deleteRepliesFromPost = "DELETE FROM postreply WHERE postId = $1"
+
 
 //
 // Profile
@@ -135,6 +138,8 @@ export {
   deleteLikes,
   deleteTags,
   deleteReply,
+  deleteRepliesFromComment,
+  deleteRepliesFromPost,
   updateDescription,
   updateComment,
   updateReply,
