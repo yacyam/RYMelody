@@ -78,6 +78,7 @@ const createReply = "INSERT INTO postreply (userId, commentId, replyId, postId, 
 
 const updateDescription = "UPDATE posts SET description = $1 WHERE id = $2"
 const updateComment = "UPDATE comments SET comment = $1 WHERE id = $2"
+const updateReply = "UPDATE postreply SET reply = $1 WHERE id = $2"
 
 const removeLike = "DELETE FROM postlikes WHERE postId = $1 AND userId = $2"
 const deletePost = "DELETE FROM posts WHERE id = $1"
@@ -85,6 +86,7 @@ const deleteComments = "DELETE FROM comments WHERE postId = $1"
 const deleteComment = "DELETE FROM comments WHERE id = $1"
 const deleteLikes = "DELETE FROM postlikes WHERE postId = $1"
 const deleteTags = "DELETE FROM posttags WHERE postId = $1"
+const deleteReply = "DELETE FROM postreply WHERE id = $1"
 
 
 //
@@ -132,8 +134,10 @@ export {
   deleteComment,
   deleteLikes,
   deleteTags,
+  deleteReply,
   updateDescription,
   updateComment,
+  updateReply,
   findProfileById,
   getAllPosts,
   getAllPostsFromLikes,

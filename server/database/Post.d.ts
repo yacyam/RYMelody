@@ -62,3 +62,7 @@ export interface ReplyTo extends Reply {
   rpusername: string | null,
   rpreply: string | null
 }
+
+export interface ReplyToModify extends ReplyTo {
+  canModify: boolean
+}

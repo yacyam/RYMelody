@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response, Router } from "express";
-import { authorizeCommentForm, authorizePostForm, authorizeReplyForm, authorizeUpdateComment, authorizeUpdateForm } from "../utils/formAuth";
+import { authorizeCommentForm, authorizeDeleteReply, authorizePostForm, authorizeReplyForm, authorizeUpdateComment, authorizeUpdateForm, authorizeUpdateReply } from "../utils/formAuth";
 import { User } from "../database/User";
 import * as Post from "../controllers/post"
-import { Comment, ModifyComment } from "../database/Post";
+import { Comment, ModifyComment, ReplyToModify } from "../database/Post";
 const router = Router()
 
 const INTERNAL_ERR_MSG = [{ message: 'Something Went Wrong, Please Try Again' }]
@@ -277,12 +277,18 @@ router.delete('/:id/comment', async (req, res) => {
 })
 
 router.get('/:id/comment/:comid/replies', async (req, res) => {
+  const userId = 'user' in req ? (req.user as User).id : undefined
   const commentId = req.params.comid
 
   try {
     const replies = await Post.getReplies(commentId)
 
-    res.status(200).send({ replies: replies })
+    const modifyReplies: ReplyToModify[] = replies.map((reply) => {
+      const canModify = reply.userid === userId
+      return { ...reply, canModify }
+    })
+
+    res.status(200).send({ replies: modifyReplies })
   }
   catch (err) {
     res.status(500).send(INTERNAL_ERR_MSG)
@@ -292,6 +298,9 @@ router.get('/:id/comment/:comid/replies', async (req, res) => {
 router.post('/:id/reply', async (req, res) => {
   if (!('user' in req)) {
     return res.status(401).send([{ message: 'Must Be Logged In To Reply' }])
+  }
+  if (!(req.user as User).verified) {
+    return res.status(401).send([{ message: 'Must Be Verified To Reply' }])
   }
   const userId = (req.user as User).id
   const { commentId, replyId, reply, isMainCommentReply } = req.body
@@ -310,6 +319,58 @@ router.post('/:id/reply', async (req, res) => {
   } catch (err) {
     res.status(500).send(INTERNAL_ERR_MSG)
   }
+})
+
+router.put('/:id/reply', async (req, res) => {
+  if (!('user' in req)) {
+    return res.status(401).send([{ message: 'Must Be Logged In To Edit Reply' }])
+  }
+  if (!(req.user as User).verified) {
+    return res.status(401).send([{ message: 'Must Be Verified To Delete Comment' }])
+  }
+  const userId = (req.user as User).id
+  const postId = req.params.id
+  const { commentId, replyId, text } = req.body
+
+  try {
+    const errors = await authorizeUpdateReply(replyId, commentId, postId, userId, text)
+
+    if (errors.length > 0) {
+      return res.status(400).send(errors)
+    }
+
+    await Post.updateReply(replyId, text)
+    res.sendStatus(200)
+  } catch (err) {
+    res.status(500).send(INTERNAL_ERR_MSG)
+  }
+})
+
+router.delete('/:id/reply', async (req, res) => {
+  if (!('user' in req)) {
+    return res.status(401).send([{ message: 'Must Be Logged In To Delete Reply' }])
+  }
+  if (!(req.user as User).verified) {
+    return res.status(401).send([{ message: 'Must Be Verified To Delete Comment' }])
+  }
+  const userId = (req.user as User).id
+  const postId = req.params.id
+  const { commentId, replyId } = req.body
+
+  try {
+    const errors = await authorizeDeleteReply(replyId, commentId, postId, userId)
+
+    if (errors.length > 0) {
+      return res.status(400).send(errors)
+    }
+
+    await Post.deleteReply(replyId)
+    res.sendStatus(200)
+  }
+  catch (err) {
+    res.status(500).send(INTERNAL_ERR_MSG)
+  }
+
 })
 
 export {

@@ -11,7 +11,7 @@ import * as UserController from '../../controllers/user'
 import * as Encrypt from '../../utils/hash'
 import * as Auth from '../../utils/formAuth'
 import { returnsOrThrows } from '../../utils/fuzz';
-import { Comment, Tags } from '../../database/Post';
+import { Comment, ReplyTo, Tags } from '../../database/Post';
 import { checkIfModifiable } from '../../routes/post';
 
 
@@ -74,6 +74,19 @@ const fakeRawComment = {
   comment: 'abcdefgh'
 }
 
+const fakeReply: ReplyTo = {
+  id: 1,
+  userid: fakeUser.id,
+  commentid: fakeComment.id,
+  replyid: null,
+  postid: fakePost.id,
+  username: fakeUser.username,
+  reply: "abcde",
+  rpuserid: null,
+  rpreply: null,
+  rpusername: null
+}
+
 const INTERNAL_ERR_MSG = [{ message: 'Something Went Wrong, Please Try Again' }]
 
 afterEach(() => {
@@ -82,7 +95,6 @@ afterEach(() => {
 
 function createPostIdMock() {
   (PostController.findById as jest.Mock).mockReturnValue(fakePost);
-  (PostController.getComments as jest.Mock).mockReturnValue([]);
   (PostController.getAllLikes as jest.Mock).mockReturnValue(1);
   (PostController.getTags as jest.Mock).mockReturnValue(TAGS);
 }
@@ -105,7 +117,6 @@ describe('inside of post endpoint', () => {
 
     it('should fail if any one of the post controllers throws error', async () => {
       (PostController.findById as jest.Mock).mockReturnValue(fakePost);
-      (PostController.getComments as jest.Mock).mockImplementation(returnsOrThrows([]));
       (PostController.getAllLikes as jest.Mock).mockImplementation(returnsOrThrows(10));
       (PostController.getTags as jest.Mock).mockImplementation(() => { throw new Error() });
 
@@ -115,7 +126,6 @@ describe('inside of post endpoint', () => {
       expect(res.body).toEqual(INTERNAL_ERR_MSG)
       expect(PostController.findById).toBeCalledTimes(1)
       expect(PostController.findById).toReturnWith(fakePost)
-      expect(PostController.getComments).toBeCalledTimes(1)
     })
 
     it('should pass if all fields are specified correctly', async () => {
@@ -126,14 +136,12 @@ describe('inside of post endpoint', () => {
       expect(res.status).toEqual(200)
       expect(res.body).toEqual({
         ...fakePost,
-        comments: [],
         tags: TAGS,
         amountLikes: 1,
         isPostLiked: false,
         canModify: false
       })
       expect(PostController.findById).toBeCalledTimes(1)
-      expect(PostController.getComments).toBeCalledTimes(1)
       expect(PostController.getAllLikes).toBeCalledTimes(1)
       expect(PostController.getTags).toBeCalledTimes(1)
 
@@ -149,7 +157,6 @@ describe('inside of post endpoint', () => {
       expect(res.status).toEqual(200)
       expect(res.body).toEqual({
         ...fakePost,
-        comments: [],
         tags: TAGS,
         amountLikes: 1,
         isPostLiked: true,
@@ -171,48 +178,6 @@ describe('inside of post endpoint', () => {
       expect(res.status).toEqual(200)
       expect(res.body).toEqual({
         ...fakePost,
-        comments: [],
-        tags: TAGS,
-        amountLikes: 1,
-        isPostLiked: true,
-        canModify: false
-      })
-    })
-
-    it('should make comments from user modifiable', async () => {
-      createPostIdMock();
-      (PostController.userLikedPost as jest.Mock).mockReturnValue(true);
-      (PostController.getComments as jest.Mock).mockReturnValueOnce([fakeComment])
-
-      const res = await user.get('/post/1')
-
-      expect(res.status).toEqual(200)
-      expect(res.body).toEqual({
-        ...fakePost,
-        comments: [{ ...fakeComment, canModify: true }],
-        tags: TAGS,
-        amountLikes: 1,
-        isPostLiked: true,
-        canModify: true
-      })
-    })
-
-    it('should make current user unable to modify different comments', async () => {
-      const newUser = {
-        ...fakeUser,
-        id: 15
-      };
-      (UserController.findById as jest.Mock).mockReturnValueOnce(newUser);
-      createPostIdMock();
-      (PostController.userLikedPost as jest.Mock).mockReturnValue(true);
-      (PostController.getComments as jest.Mock).mockReturnValueOnce([fakeComment])
-
-      const res = await user.get('/post/1')
-
-      expect(res.status).toEqual(200)
-      expect(res.body).toEqual({
-        ...fakePost,
-        comments: [{ ...fakeComment, canModify: false }],
         tags: TAGS,
         amountLikes: 1,
         isPostLiked: true,
@@ -321,6 +286,65 @@ describe('inside of post endpoint', () => {
         .toBeCalledWith(1, fakePost.title, fakePost.description, fakePost.audio)
       expect(PostController.createTags).toBeCalledTimes(1)
       expect(PostController.createTags).toBeCalledWith(fakePost.id, TAGS)
+    })
+  })
+
+  describe('when getting all comments', () => {
+    const fakeComment1 = { ...fakeComment, userid: fakeComment.userid + 1 }
+    const fakeComment2 = { ...fakeComment, userid: fakeComment.userid + 2 }
+    const fakeComment3 = { ...fakeComment, userid: fakeComment.userid + 3 }
+
+    it('should fail if post controller throws error in getting comments', async () => {
+      (PostController.getComments as jest.Mock).mockImplementationOnce(() => { throw new Error() })
+
+      const res = await request(app).get('/post/4/comments')
+
+      expect(res.status).toBe(500)
+      expect(res.body).toEqual(INTERNAL_ERR_MSG)
+      expect(PostController.getComments).toBeCalledTimes(1)
+      expect(PostController.getComments).toBeCalledWith("4")
+    })
+
+    it('should make all comments unmodifiable if user is not logged in', async () => {
+      (PostController.getComments as jest.Mock).mockReturnValueOnce([fakeComment, fakeComment1, fakeComment2, fakeComment3])
+
+      const res = await request(app).get('/post/4/comments')
+
+      expect(res.status).toBe(200)
+      expect(res.body.comments).toEqual([
+        { ...fakeComment, canModify: false },
+        { ...fakeComment1, canModify: false },
+        { ...fakeComment2, canModify: false },
+        { ...fakeComment3, canModify: false }
+      ])
+      expect(PostController.getComments).toBeCalledTimes(1)
+    })
+
+    it('should make some comments modifiable if user posted it', async () => {
+      (PostController.getComments as jest.Mock).mockReturnValueOnce([fakeComment, fakeComment1, fakeComment2])
+
+      const res = await user.get('/post/5/comments')
+
+      expect(res.status).toBe(200)
+      expect(res.body.comments).toEqual([
+        { ...fakeComment, canModify: true },
+        { ...fakeComment1, canModify: false },
+        { ...fakeComment2, canModify: false }
+      ])
+      expect(PostController.getComments).toBeCalledTimes(1)
+    })
+
+    it('should make all comments modifiable if user posted them all', async () => {
+      (PostController.getComments as jest.Mock).mockReturnValueOnce([fakeComment, fakeComment, fakeComment])
+
+      const res = await user.get('/post/10/comments')
+
+      expect(res.status).toBe(200)
+      expect(res.body.comments).toEqual([
+        { ...fakeComment, canModify: true },
+        { ...fakeComment, canModify: true },
+        { ...fakeComment, canModify: true }
+      ])
     })
   })
 
@@ -830,6 +854,155 @@ describe('inside of post endpoint', () => {
         { ...newComment3, canModify: true },
         { ...newComment3, canModify: true }
       ])
+    })
+  })
+
+  describe('when getting all replies', () => {
+    const fakeReply1 = { ...fakeReply, userid: fakeReply.userid + 1 }
+    const fakeReply2 = { ...fakeReply, userid: fakeReply.userid + 2 }
+    const fakeReply3 = { ...fakeReply, userid: fakeReply.userid + 3 }
+
+    it('should fail if post controller fails to get replies', async () => {
+      (PostController.getReplies as jest.Mock).mockImplementationOnce(() => { throw new Error() })
+
+      const res = await request(app).get('/post/4/comment/1/replies')
+
+      expect(res.status).toBe(500)
+      expect(res.body).toEqual(INTERNAL_ERR_MSG)
+      expect(PostController.getReplies).toBeCalledTimes(1)
+      expect(PostController.getReplies).toBeCalledWith("1")
+    })
+
+    it('should make all replies unmodifiable if user is not logged in', async () => {
+      (PostController.getReplies as jest.Mock).mockReturnValueOnce([fakeReply, fakeReply1, fakeReply2])
+
+      const res = await request(app).get('/post/4/comment/1/replies')
+
+      expect(res.status).toBe(200)
+      expect(res.body.replies).toEqual([
+        { ...fakeReply, canModify: false },
+        { ...fakeReply1, canModify: false },
+        { ...fakeReply2, canModify: false }
+      ])
+      expect(PostController.getReplies).toBeCalledTimes(1)
+    })
+
+    it('should make some replies modifiable if user posted them', async () => {
+      (PostController.getReplies as jest.Mock).mockReturnValueOnce([fakeReply1, fakeReply, fakeReply2])
+
+      const res = await user.get('/post/1/comment/1/replies')
+
+      expect(res.status).toBe(200)
+      expect(res.body.replies).toEqual([
+        { ...fakeReply1, canModify: false },
+        { ...fakeReply, canModify: true },
+        { ...fakeReply2, canModify: false }
+      ])
+      expect(PostController.getReplies).toBeCalledTimes(1)
+    })
+
+    it('should make all replies modifiable if user posted all', async () => {
+      (PostController.getReplies as jest.Mock).mockReturnValueOnce([fakeReply, fakeReply, fakeReply])
+
+      const res = await user.get('/post/1/comment/1/replies')
+
+      expect(res.status).toBe(200)
+      expect(res.body.replies).toEqual([
+        { ...fakeReply, canModify: true },
+        { ...fakeReply, canModify: true },
+        { ...fakeReply, canModify: true }
+      ])
+      expect(PostController.getReplies).toBeCalledTimes(1)
+    })
+  })
+
+  describe('when posting a new reply', () => {
+
+    const fakeReplyData = {
+      commentId: fakeReply.commentid,
+      replyId: fakeReply.id,
+      reply: fakeReply.reply,
+      isMainCommentReply: true
+    }
+
+    it('should fail if the user is not logged in', async () => {
+
+      const res = await request(app).post('/post/1/reply')
+
+      expect(res.status).toBe(401)
+      expect(res.body).toEqual([{ message: 'Must Be Logged In To Reply' }])
+    })
+
+    it('should fail if the user is not logged in', async () => {
+      (UserController.findById as jest.Mock).mockReturnValueOnce({ ...fakeUser, verified: false })
+
+      const res = await user.post('/post/1/reply')
+
+      expect(res.status).toBe(401)
+      expect(res.body).toEqual([{ message: 'Must Be Verified To Reply' }])
+    })
+
+    jest.spyOn(Auth, 'authorizeReplyForm')
+
+    it('should fail if authorizing the reply form throws error', async () => {
+      (Auth.authorizeReplyForm as jest.Mock).mockImplementationOnce(() => { throw new Error() })
+
+      const res = await user.post('/post/1/reply')
+
+      expect(res.status).toBe(500)
+      expect(res.body).toEqual(INTERNAL_ERR_MSG)
+      expect(Auth.authorizeReplyForm).toBeCalledTimes(1)
+    })
+
+    it('should fail if authorizing the reply form fails', async () => {
+      (Auth.authorizeReplyForm as jest.Mock).mockReturnValueOnce([{ message: 'Reply Failed To Authorize' }])
+
+      const res = await user.post('/post/1/reply').send(fakeReplyData)
+
+      expect(res.status).toBe(400)
+      expect(res.body).toEqual([{ message: 'Reply Failed To Authorize' }])
+      expect(Auth.authorizeReplyForm).toBeCalledTimes(1)
+      expect(Auth.authorizeReplyForm).toBeCalledWith(
+        fakeReplyData.commentId,
+        fakeReplyData.replyId,
+        "1",
+        fakeReplyData.reply,
+        fakeReplyData.isMainCommentReply
+      )
+    })
+
+    it('should fail if creating a reply fails', async () => {
+      (Auth.authorizeReplyForm as jest.Mock).mockReturnValue([]);
+      (PostController.createReply as jest.Mock).mockImplementationOnce(() => { throw new Error() })
+
+      const res = await user.post('/post/1/reply').send(fakeReplyData)
+
+      expect(res.status).toBe(500)
+      expect(res.body).toEqual(INTERNAL_ERR_MSG)
+      expect(Auth.authorizeReplyForm).toBeCalledTimes(1)
+      expect(PostController.createReply).toBeCalledTimes(1)
+      expect(PostController.createReply).toBeCalledWith(
+        fakeUser.id,
+        fakeReplyData.commentId,
+        fakeReplyData.replyId,
+        "1",
+        fakeReplyData.reply
+      )
+    })
+
+    it('should pass if all fields are correct', async () => {
+      (PostController.createReply as jest.Mock).mockReturnValue(10)
+
+      const res = await user.post('/post/1/reply').send(fakeReplyData)
+
+      expect(res.status).toBe(200)
+      expect(res.body).toEqual({
+        newReplyId: 10,
+        userId: fakeUser.id,
+        username: fakeUser.username
+      })
+      expect(Auth.authorizeReplyForm).toBeCalledTimes(1)
+      expect(PostController.createReply).toBeCalledTimes(1)
     })
   })
 })

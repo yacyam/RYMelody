@@ -5,6 +5,9 @@ const emailCheck = /^(?=.{1,254}$)(?=.{1,64}@)[-!#$%&'*+/0-9=?A-Z^_`a-z{|}~]+(\.
 
 const MIN_COMMENT_LEN = 4
 const MAX_COMMENT_LEN = 400
+
+const MIN_REPLY_LEN = 4
+const MAX_REPLY_LEN = 400
 /**
  * Checks if all registration parameters are valid to create a user
  * @param username 
@@ -300,13 +303,72 @@ async function authorizeReplyForm(
     }
   }
 
-  if (reply.length < 4 || reply.length > 400) {
-    errors.push({ message: 'Reply Must Be 4 - 400 Characters Long' })
+  if (reply.length < MIN_REPLY_LEN || reply.length > MAX_REPLY_LEN) {
+    errors.push({ message: `Reply Must Be ${MIN_REPLY_LEN} - ${MAX_REPLY_LEN} Characters Long` })
   }
 
   return errors
 }
 
+async function authorizeReplyChange(
+  replyId: number,
+  commentId: number,
+  postId: string,
+  userId: number
+): Promise<{ message: string }[]> {
+  const errors: { message: string }[] = []
+
+  const reply = await Post.findReplyById(replyId)
+
+  if (!reply) {
+    return [{ message: 'Reply Does Not Exist' }]
+  }
+
+  if (reply.id !== replyId) {
+    return [{ message: 'Database Returned Incorrect Reply' }]
+  }
+
+  if (reply.userid !== userId) {
+    return [{ message: 'Only Original Replier Can Edit Reply' }]
+  }
+
+  if (reply.commentid !== commentId) {
+    errors.push({ message: 'Editing Reply Under Different Comment' })
+  }
+
+  if (`${reply.postid}` !== postId) {
+    errors.push({ message: 'Editing Reply Under Different Post' })
+  }
+
+  return errors
+}
+
+async function authorizeUpdateReply(
+  replyId: number,
+  commentId: number,
+  postId: string,
+  userId: number,
+  text: string
+): Promise<{ message: string }[]> {
+  const errors = await authorizeReplyChange(replyId, commentId, postId, userId)
+
+  if (text.length < MIN_REPLY_LEN || text.length > MAX_REPLY_LEN) {
+    errors.push({ message: `Reply Must Be ${MIN_REPLY_LEN} - ${MAX_REPLY_LEN} Characters Long` })
+  }
+
+  return errors
+}
+
+async function authorizeDeleteReply(
+  replyId: number,
+  commentId: number,
+  postId: string,
+  userId: number
+): Promise<{ message: string }[]> {
+  const errors = await authorizeReplyChange(replyId, commentId, postId, userId)
+
+  return errors
+}
 export {
   authorizeRegisterForm,
   authorizePostForm,
@@ -314,5 +376,7 @@ export {
   authorizeUpdateForm,
   authorizeUpdateProfile,
   authorizeUpdateComment,
-  authorizeReplyForm
+  authorizeReplyForm,
+  authorizeUpdateReply,
+  authorizeDeleteReply
 }

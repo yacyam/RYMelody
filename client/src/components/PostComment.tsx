@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Comment, ReplyData, ReplyToData } from "../interfaces/Post";
+import { Comment, ReplyToData } from "../interfaces/Post";
 import "../styles/components/PostComment.css"
 import { Edit } from "./Edit";
 import Errors from "./Error";
@@ -153,7 +153,8 @@ export default function PostComment(props: CommentSetter) {
           reply: data.text,
           rpreply: null,
           rpuserid: null,
-          rpusername: null
+          rpusername: null,
+          canModify: true
         })
 
         return newReplies

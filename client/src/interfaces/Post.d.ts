@@ -50,5 +50,6 @@ export interface ReplyData {
 export interface ReplyToData extends ReplyData {
   rpuserid: number | null,
   rpusername: string | null,
-  rpreply: string | null
+  rpreply: string | null,
+  canModify: boolean
 }

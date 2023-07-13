@@ -18,11 +18,56 @@
   padding-left: 10px;
 }
 
-.reply--create p {
+.reply--create-edit {
+  display: flex;
+  gap: 8px;
+}
+
+.reply--create-edit p {
   color: gray;
   cursor: pointer;
 }
 
-.reply--to {
+.reply--to-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  transition: all ease-in 1s;
+}
+
+.reply--to-username {
   color: gray
+}
+
+.reply--display-origin {
+  height: 20px;
+  width: 30px;
+  background-color: #100046;
+  cursor: pointer;
+  transition: all ease-in 0.2s;
+}
+
+.reply--display-origin:hover {
+  background-color: rgba(55, 55, 55, 0.686);
+}
+
+.reply--display-origin p {
+  position: relative;
+  top: -7.5px;
+  left: 7.5px;
+  font-size: 18px;
+  font-weight: 800;
+  color: rgb(149, 149, 149);
+}
+
+.reply--rpreply {
+  border-left: 1px solid rgb(154, 154, 154);
+  margin-left: 15px;
+  padding-left: 10px;
+  color: gray;
+}
+
+.reply--rpreply-username {
+  color: #c0c0c0;
 }

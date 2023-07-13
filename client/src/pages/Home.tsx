@@ -38,7 +38,12 @@ export default function Home() {
     fetch(`http://localhost:3000/post/all${queryString}`, {
       method: 'GET'
     })
-      .then(res => res.json())
+      .then(res => {
+        if (res.ok) {
+          return res.json()
+        }
+        return []
+      })
       .then(data => {
         setFirstPosts(data)
       })

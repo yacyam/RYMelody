@@ -260,6 +260,14 @@ async function createReply(
 
 }
 
+async function updateReply(id: number | string, reply: string): Promise<void> {
+  await pool.query(Query.updateReply, [reply, id])
+}
+
+async function deleteReply(id: number | string): Promise<void> {
+  await pool.query(Query.deleteReply, [id])
+}
+
 export {
   getPosts,
   getAllLikes,
@@ -278,7 +286,9 @@ export {
   unlikePost,
   updateDescription,
   updateComment,
+  updateReply,
   deletePost,
-  deleteComment
+  deleteComment,
+  deleteReply
 }
 
