@@ -6,8 +6,9 @@ import * as UserController from '../../controllers/user'
 import * as PostController from '../../controllers/post'
 import { User, OptionalUser } from '../../database/User';
 import * as Auth from '../../utils/formAuth'
+import { authorizeReplyChange } from '../../utils/formAuth'
 import { generateRandomStrings } from '../../utils/fuzz';
-import { Tags } from '../../database/Post';
+import { RawReply, Tags } from '../../database/Post';
 import { verifyTimeSent } from '../../utils/mail'
 
 const NOT_FILLED_ERROR = 'All Fields Must Be Filled In'
@@ -56,6 +57,14 @@ const fakeRawComment = {
   comment: 'abcdefgh'
 }
 
+const fakeRawReply: RawReply = {
+  id: 1,
+  userid: fakeUser.id,
+  commentid: fakeRawComment.id,
+  postid: fakePost.id,
+  replyid: null
+}
+
 
 afterEach(() => {
   jest.clearAllMocks()
@@ -68,7 +77,7 @@ describe('inside of form auth', () => {
     it('should fail when some field does not exist', async () => {
       jest.spyOn(Auth, 'authorizeRegisterForm')
 
-      const res = [
+      const errors = [
         ["", EMAIL, PASS, CONF],
         [USERNAME, "", PASS, CONF],
         [USERNAME, EMAIL, "", CONF],
@@ -531,6 +540,337 @@ describe('inside of form auth', () => {
 
       expect(check1).toBe(true)
       expect(check2).toBe(true)
+    })
+  })
+
+  describe('when authorizing reply form', () => {
+    it('should fail if the post does not exist', async () => {
+      (PostController.findById as jest.Mock).mockReturnValueOnce(undefined)
+
+      const errors = await Auth.authorizeReplyForm(1, 1, "1", "abcde", true)
+
+      expect(errors.length).toBe(1)
+      expect(errors[0].message).toEqual("Post Does Not Exist")
+      expect(PostController.findById).toBeCalledTimes(1)
+      expect(PostController.findById).toBeCalledWith("1")
+    })
+
+    it('should fail if the comment does not exist', async () => {
+      (PostController.findById as jest.Mock).mockReturnValue(fakePost);
+      (PostController.findCommentById as jest.Mock).mockReturnValueOnce(undefined)
+
+      const errors = await Auth.authorizeReplyForm(12, 1, "1", "abc", true)
+
+      expect(errors.length).toBe(1)
+      expect(errors[0].message).toEqual("Comment Does Not Exist, Cannot Reply To It")
+      expect(PostController.findById).toBeCalledTimes(1)
+      expect(PostController.findById).toBeCalledWith("1")
+      expect(PostController.findCommentById).toBeCalledTimes(1)
+      expect(PostController.findCommentById).toBeCalledWith(12)
+    })
+
+    it('should fail if post id of comment is different from id of post given', async () => {
+      (PostController.findCommentById as jest.Mock).mockReturnValueOnce({ ...fakeRawComment, postid: fakePost.id + 1 })
+
+      const errors = await Auth.authorizeReplyForm(5, undefined, "1", "abcde", true)
+
+      expect(errors.length).toBe(1)
+      expect(errors[0].message).toEqual("Comment Exists Under Different Post")
+      expect(PostController.findById).toBeCalledTimes(1)
+      expect(PostController.findCommentById).toBeCalledTimes(1)
+    })
+
+    it('should fail if reply id not specified when replying to reply', async () => {
+      (PostController.findCommentById as jest.Mock).mockReturnValue(fakeRawComment)
+
+      const errors = await Auth.authorizeReplyForm(5, undefined, "4", "abcd", false)
+
+      expect(errors.length).toBe(1)
+      expect(errors[0].message).toEqual("Reply Not to Main Comment Should Specify A Reply Id")
+      expect(PostController.findById).toBeCalledTimes(1)
+      expect(PostController.findCommentById).toBeCalledTimes(1)
+    })
+
+    it('should fail if replying to reply that does not exist', async () => {
+      (PostController.findReplyById as jest.Mock).mockReturnValueOnce(undefined)
+
+      const errors = await Auth.authorizeReplyForm(4, 2, "3", "abcd", false)
+
+      expect(errors.length).toBe(1)
+      expect(errors[0].message).toEqual("Reply Does Not Exist")
+      expect(PostController.findById).toBeCalledTimes(1)
+      expect(PostController.findCommentById).toBeCalledTimes(1)
+      expect(PostController.findReplyById).toBeCalledTimes(1)
+      expect(PostController.findReplyById).toBeCalledWith(2)
+    })
+
+    it('should fail if replying to reply under different comment', async () => {
+      (PostController.findReplyById as jest.Mock).mockReturnValueOnce({ ...fakeRawReply, commentid: fakeRawComment.id + 1 })
+
+      const errors = await Auth.authorizeReplyForm(1, 1, "1", "abcd", false)
+
+      expect(errors.length).toBe(1)
+      expect(errors[0].message).toEqual('Reply Is Under Different Comment')
+      expect(PostController.findById).toBeCalledTimes(1)
+      expect(PostController.findCommentById).toBeCalledTimes(1)
+      expect(PostController.findReplyById).toBeCalledTimes(1)
+    })
+
+    it('should fail if replying to reply under different post', async () => {
+      (PostController.findReplyById as jest.Mock).mockReturnValueOnce({ ...fakeRawReply, postid: fakePost.id + 1 })
+
+      const errors = await Auth.authorizeReplyForm(1, 1, "3", "abcd", false)
+
+      expect(errors.length).toBe(1)
+      expect(errors[0].message).toEqual('Reply Is Under Different Post')
+      expect(PostController.findById).toBeCalledTimes(1)
+      expect(PostController.findCommentById).toBeCalledTimes(1)
+      expect(PostController.findReplyById).toBeCalledTimes(1)
+    })
+
+    it('should fail if a main comment reply but reply id is given', async () => {
+      const errors = await Auth.authorizeReplyForm(1, 12, "1", "abcd", true)
+
+      expect(errors.length).toBe(1)
+      expect(errors[0].message).toEqual('Reply Id Should Not Be Defined If Replying To Main Comment')
+      expect(PostController.findById).toBeCalledTimes(1)
+      expect(PostController.findCommentById).toBeCalledTimes(1)
+      expect(PostController.findReplyById).toBeCalledTimes(0)
+    })
+
+    it('should fail if reply length is not within specified range', async () => {
+      (PostController.findReplyById as jest.Mock).mockReturnValue(fakeRawReply)
+
+      const errs1 = await Auth.authorizeReplyForm(1, 1, "1", "ab", false)
+      const errs2 = await Auth.authorizeReplyForm(1, undefined, "1", generateRandomStrings(401, 1000, 1)[0], true)
+
+      expect(errs1.length).toBe(1)
+      expect(errs1[0].message).toEqual("Reply Must Be 4 - 400 Characters Long")
+      expect(errs2.length).toBe(1)
+      expect(errs2[0].message).toEqual("Reply Must Be 4 - 400 Characters Long")
+      expect(PostController.findById).toBeCalledTimes(2)
+      expect(PostController.findCommentById).toBeCalledTimes(2)
+      expect(PostController.findReplyById).toBeCalledTimes(1)
+    })
+
+    it('should fail if multiple errors are given (not main comment reply)', async () => {
+      (PostController.findCommentById as jest.Mock).mockReturnValueOnce({ ...fakeRawComment, postid: fakePost.id + 1 });
+      (PostController.findReplyById as jest.Mock).mockReturnValueOnce(
+        {
+          ...fakeRawReply,
+          postid: fakePost.id + 1,
+          commentid: fakeRawComment.id + 1
+        }
+      );
+      const errors = await Auth.authorizeReplyForm(1, 1, "1", "a", false)
+
+      expect(errors.length).toBe(4)
+      expect(errors[0].message).toEqual('Comment Exists Under Different Post')
+      expect(errors[1].message).toEqual('Reply Is Under Different Comment')
+      expect(errors[2].message).toEqual('Reply Is Under Different Post')
+      expect(errors[3].message).toEqual('Reply Must Be 4 - 400 Characters Long')
+      expect(PostController.findById).toBeCalledTimes(1)
+      expect(PostController.findCommentById).toBeCalledTimes(1)
+      expect(PostController.findReplyById).toBeCalledTimes(1)
+    })
+
+    it('should fail if multiple errors are given (main comment reply)', async () => {
+      (PostController.findCommentById as jest.Mock).mockReturnValueOnce({ ...fakeRawComment, postid: fakePost.id + 1 });
+
+      const errors = await Auth.authorizeReplyForm(1, 1, "1", "ab", true)
+
+      expect(errors.length).toBe(3)
+      expect(errors[0].message).toEqual('Comment Exists Under Different Post')
+      expect(errors[1].message).toEqual('Reply Id Should Not Be Defined If Replying To Main Comment')
+      expect(errors[2].message).toEqual('Reply Must Be 4 - 400 Characters Long')
+      expect(PostController.findById).toBeCalledTimes(1)
+      expect(PostController.findCommentById).toBeCalledTimes(1)
+    })
+
+    it('should pass with no errors if all fields are correct', async () => {
+      const errs1 = await Auth.authorizeReplyForm(1, 1, "1", "abcde", false)
+      const errs2 = await Auth.authorizeReplyForm(1, undefined, "1", "abcdefgh", true)
+
+      expect(errs1.length).toBe(0)
+      expect(errs2.length).toBe(0)
+      expect(PostController.findById).toBeCalledTimes(2)
+      expect(PostController.findCommentById).toBeCalledTimes(2)
+      expect(PostController.findReplyById).toBeCalledTimes(1)
+    })
+  })
+
+  describe('when authorizing reply change', () => {
+    it('should fail if reply does not exist', async () => {
+      (PostController.findReplyById as jest.Mock).mockReturnValueOnce(undefined)
+
+      const errors = await Auth.authorizeReplyChange(0, 1, "1", 1)
+
+      expect(errors.length).toBe(1)
+      expect(errors[0].message).toEqual("Reply Does Not Exist")
+      expect(PostController.findReplyById).toBeCalledTimes(1)
+      expect(PostController.findReplyById).toBeCalledWith(0)
+    })
+
+    it('should fail if reply id arg is different from database reply id', async () => {
+      (PostController.findReplyById as jest.Mock).mockReturnValue(fakeRawReply)
+
+      const errors = await Auth.authorizeReplyChange(fakeRawReply.id + 1, 1, "1", 1)
+
+      expect(errors.length).toBe(1)
+      expect(errors[0].message).toEqual('Database Returned Incorrect Reply')
+      expect(PostController.findReplyById).toBeCalledTimes(1)
+      expect(PostController.findReplyById).toBeCalledWith(fakeRawReply.id + 1)
+    })
+
+    it('should fail if user id arg is different from reply user id', async () => {
+      const errors = await Auth.authorizeReplyChange(fakeRawReply.id, 1, "1", fakeRawReply.userid + 1)
+
+      expect(errors.length).toBe(1)
+      expect(errors[0].message).toEqual('Only Original Replier Can Edit Reply')
+      expect(PostController.findReplyById).toBeCalledTimes(1)
+      expect(PostController.findReplyById).toBeCalledWith(fakeRawReply.id)
+    })
+
+    it('should fail if comment id arg is different from reply comment id', async () => {
+      const errors = await Auth.authorizeReplyChange(
+        fakeRawReply.id,
+        fakeRawReply.commentid + 1,
+        `${fakeRawReply.postid}`,
+        fakeRawReply.userid
+      );
+      expect(errors.length).toBe(1)
+      expect(errors[0].message).toEqual('Editing Reply Under Different Comment')
+      expect(PostController.findReplyById).toBeCalledTimes(1)
+    })
+
+    it('should fail if post id arg is different from reply post id', async () => {
+      const errors = await Auth.authorizeReplyChange(
+        fakeRawReply.id,
+        fakeRawReply.commentid,
+        `${fakeRawReply.postid + 1}`,
+        fakeRawReply.userid
+      );
+      expect(errors.length).toBe(1)
+      expect(errors[0].message).toEqual('Editing Reply Under Different Post')
+      expect(PostController.findReplyById).toBeCalledTimes(1)
+    })
+
+    it('should fail with multiple errors if comment and post id wrong', async () => {
+      const errors = await Auth.authorizeReplyChange(
+        fakeRawReply.id,
+        fakeRawReply.commentid + 1,
+        `${fakeRawReply.postid + 1}`,
+        fakeRawReply.userid
+      );
+      expect(errors.length).toBe(2)
+      expect(errors[0].message).toEqual('Editing Reply Under Different Comment')
+      expect(errors[1].message).toEqual('Editing Reply Under Different Post')
+      expect(PostController.findReplyById).toBeCalledTimes(1)
+    })
+
+    it('should pass if all checking passes', async () => {
+      const errors = await Auth.authorizeReplyChange(
+        fakeRawReply.id,
+        fakeRawReply.commentid,
+        `${fakeRawReply.postid}`,
+        fakeRawReply.userid
+      );
+      expect(errors.length).toBe(0)
+      expect(PostController.findReplyById).toBeCalledTimes(1)
+    })
+  })
+
+  describe('when authorizing reply edit', () => {
+
+    jest.spyOn(Auth, 'authorizeReplyChange')
+
+    it('should be identical to single reply change error if text length valid', async () => {
+      const errors = await Auth.authorizeUpdateReply(fakeRawReply.id, 0, `1`, fakeRawReply.userid + 1, "abcd")
+
+      expect(errors.length).toBe(1)
+      expect(errors[0].message).toEqual("Only Original Replier Can Edit Reply")
+    })
+
+    it('should be identical to all reply change errors if text length valid', async () => {
+
+      const errors = await Auth.authorizeUpdateReply(
+        fakeRawReply.id,
+        fakeRawReply.commentid + 1,
+        `${fakeRawReply.postid + 1}`,
+        fakeRawReply.userid,
+        "abcd"
+      )
+
+      expect(errors.length).toBe(2)
+      expect(errors[0].message).toEqual("Editing Reply Under Different Comment")
+      expect(errors[1].message).toEqual("Editing Reply Under Different Post")
+
+    })
+
+    it('should have 1 extra error if text length is invalid', async () => {
+
+      const errs1 = await Auth.authorizeUpdateReply(
+        fakeRawReply.id,
+        fakeRawReply.commentid + 1,
+        `${fakeRawReply.postid + 1}`,
+        fakeRawReply.userid,
+        "ab"
+      )
+
+      const errs2 = await Auth.authorizeUpdateReply(fakeRawReply.id + 1, 1, "1", 1, generateRandomStrings(401, 1000, 1)[0])
+
+      expect(errs1.length).toBe(3)
+      expect(errs1[2].message).toBe('Reply Must Be 4 - 400 Characters Long')
+      expect(errs2.length).toBe(2)
+      expect(errs2[1].message).toBe('Reply Must Be 4 - 400 Characters Long')
+    })
+
+    it('should have no errors if text length is valid and reply change authorizes', async () => {
+      const errors = await Auth.authorizeUpdateReply(
+        fakeRawReply.id,
+        fakeRawReply.commentid,
+        `${fakeRawReply.postid}`,
+        fakeRawReply.userid,
+        "abcde"
+      )
+
+      expect(errors.length).toBe(0)
+    })
+  })
+
+  describe('when authorizing delete form', () => {
+
+    it('should return the same errors as reply change auth', async () => {
+      const errs1 = await Auth.authorizeDeleteReply(
+        fakeRawReply.id,
+        fakeRawReply.commentid + 1,
+        `${fakeRawReply.postid + 1}`,
+        fakeRawReply.userid
+      )
+
+      const errs2 = await Auth.authorizeDeleteReply(
+        fakeRawReply.id,
+        fakeRawReply.commentid,
+        `${fakeRawReply.postid}`,
+        fakeRawReply.userid + 1,
+      )
+
+      expect(errs1.length).toBe(2)
+      expect(errs2.length).toBe(1)
+      expect(errs1[0].message).toEqual("Editing Reply Under Different Comment")
+      expect(errs1[1].message).toEqual("Editing Reply Under Different Post")
+      expect(errs2[0].message).toEqual('Only Original Replier Can Edit Reply')
+    })
+
+    it('should have no errors if reply change authorizes', async () => {
+      const errors = await Auth.authorizeDeleteReply(
+        fakeRawReply.id,
+        fakeRawReply.commentid,
+        `${fakeRawReply.postid}`,
+        fakeRawReply.userid
+      )
+
+      expect(errors.length).toBe(0)
     })
   })
 })

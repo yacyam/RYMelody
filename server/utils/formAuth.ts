@@ -261,6 +261,17 @@ async function authorizeUpdateComment(
   return errors
 }
 
+/**
+ * Checks whether all reply parameters are valid to create create reply.
+ * @param commentId 
+ * @param replyId ID of Reply The Currently Authorized Reply is Replying to.
+ * If Main Comment Reply, should be undefined.
+ * @param postId 
+ * @param reply 
+ * @param isMainCommentReply Whether Currently Authorized Reply is Replying to
+ * Main Comment or Another Reply
+ * @returns All Errors Associated With Authorization
+ */
 async function authorizeReplyForm(
   commentId: number,
   replyId: number | undefined,
@@ -286,7 +297,7 @@ async function authorizeReplyForm(
 
   if (!isMainCommentReply) {
     if (!replyId) {
-      return [{ message: 'Reply Does Not Exist' }]
+      return [{ message: 'Reply Not to Main Comment Should Specify A Reply Id' }]
     }
     const reply = await Post.findReplyById(replyId)
 
@@ -294,12 +305,17 @@ async function authorizeReplyForm(
       return [{ message: 'Reply Does Not Exist' }]
     }
 
-    if (reply.commentid !== commentId) {
+    if (reply.commentid !== comment.id) {
       errors.push({ message: 'Reply Is Under Different Comment' })
     }
 
     if (reply.postid !== post.id) {
       errors.push({ message: 'Reply Is Under Different Post' })
+    }
+  }
+  else {
+    if (replyId !== undefined) {
+      errors.push({ message: 'Reply Id Should Not Be Defined If Replying To Main Comment' })
     }
   }
 
@@ -310,6 +326,14 @@ async function authorizeReplyForm(
   return errors
 }
 
+/**
+ * Checks whether all parameters are valid to modify reply.
+ * @param replyId Current ID of Reply Wanting to be Changed.
+ * @param commentId 
+ * @param postId 
+ * @param userId 
+ * @returns All Errors Associated With Reply Change Authorization
+ */
 async function authorizeReplyChange(
   replyId: number,
   commentId: number,
@@ -343,6 +367,15 @@ async function authorizeReplyChange(
   return errors
 }
 
+/**
+ * Checks whether all parameters are valid to update reply.
+ * @param replyId Current ID of Reply Wanting to be Updated.
+ * @param commentId 
+ * @param postId 
+ * @param userId 
+ * @param text New Reply Text
+ * @returns All Errors Associated With Reply Update Authorization
+ */
 async function authorizeUpdateReply(
   replyId: number,
   commentId: number,
@@ -359,6 +392,14 @@ async function authorizeUpdateReply(
   return errors
 }
 
+/**
+ * Checks whether all parameters are valid to delete reply.
+ * @param replyId Current ID of Reply Wanting to be Deleted.
+ * @param commentId 
+ * @param postId 
+ * @param userId 
+ * @returns All Errors Associated With Deleting Reply Authorization
+ */
 async function authorizeDeleteReply(
   replyId: number,
   commentId: number,
@@ -377,6 +418,7 @@ export {
   authorizeUpdateProfile,
   authorizeUpdateComment,
   authorizeReplyForm,
+  authorizeReplyChange,
   authorizeUpdateReply,
   authorizeDeleteReply
 }
