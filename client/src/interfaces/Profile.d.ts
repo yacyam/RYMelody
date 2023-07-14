@@ -1,11 +1,12 @@
 import { HighlightPost } from "./Post"
 
 export interface UserProfile {
-  userid: number,
+  id: number,
   username: string,
   contact: string,
   bio: string,
   canModify: boolean,
   likes: HighlightPost[],
-  posts: HighlightPost[]
+  posts: HighlightPost[],
+  isVerified: boolean
 }

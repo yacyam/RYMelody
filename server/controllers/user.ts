@@ -87,7 +87,7 @@ async function insertToken(
 }
 
 /**
- * Updates unverified user with new token
+ * Updates unverified user with new token and refreshed token duration
  * @param userId 
  * @param newToken Token associated with user verification
  */
@@ -127,9 +127,28 @@ async function findVerifyData(
   return verifyData.rows[0]
 }
 
+/**
+ * Obtains Verification Data From User ID
+ * @param userId 
+ * @returns Verification Data Associated With User
+ */
+async function findVerifyDataById(
+  userId: number | string
+): Promise<Verify | undefined> {
+
+  const verifyData: QueryResult = await pool.query(Query.findVerifyDataById, [userId])
+
+  if (verifyData.rows.length === 0) {
+    return undefined
+  }
+
+  return verifyData.rows[0]
+}
+
 export {
   findById,
   findVerifyData,
+  findVerifyDataById,
   findOne,
   createUser,
   verifyUser,

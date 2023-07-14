@@ -15,6 +15,7 @@ export default function MainProfile(props: PropTypes) {
   const [isEditingBio, setIsEditingBio] = useState(false)
   const [editContactErrors, setEditContactErrors] = useState<MsgErr>([])
   const [editBioErrors, setEditBioErrors] = useState<MsgErr>([])
+  const [sendVerificationErrors, setSendVerificationErrors] = useState<MsgErr>([])
 
   function updateEditingContact() {
     setIsEditingContact(prevEditing => !prevEditing)
@@ -43,6 +44,19 @@ export default function MainProfile(props: PropTypes) {
     }
     else {
       setEditBioErrors(updateErrors)
+    }
+  }
+
+  async function resendVerification(): Promise<void> {
+
+    const res = await fetch(`http://localhost:3000/user/${props.id}/resendVerification`, {
+      method: 'GET',
+      'credentials': 'include'
+    })
+
+    if (!res.ok) {
+      const errors = await res.json()
+      setSendVerificationErrors(errors)
     }
   }
 
@@ -81,6 +95,20 @@ export default function MainProfile(props: PropTypes) {
 
         <Errors
           errors={editBioErrors}
+        />
+
+        {
+          !props.isVerified &&
+          <div className="mainprofile--verify">
+            <h3 className="mainprofile--verify-txt">Resend Verification Link:</h3>
+            <button onClick={resendVerification} className="mainprofile--verify-btn">
+              Send
+            </button>
+          </div>
+        }
+
+        <Errors
+          errors={sendVerificationErrors}
         />
       </>
     )

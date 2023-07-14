@@ -3,6 +3,7 @@ const findByUsername = "SELECT * FROM users WHERE username = $1"
 const findByEmail = "SELECT * FROM users WHERE email = $1"
 const findById = "SELECT * FROM users WHERE id = $1"
 const findVerifyData = "SELECT * FROM verify WHERE token = $1"
+const findVerifyDataById = "SELECT * FROM verify WHERE userId = $1"
 
 const createUser = "INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING id"
 const verifyUser = "UPDATE users SET verified = TRUE WHERE id = $1"
@@ -111,6 +112,7 @@ export {
   findByEmail,
   findById,
   findVerifyData,
+  findVerifyDataById,
   createUser,
   verifyUser,
   insertToken,
