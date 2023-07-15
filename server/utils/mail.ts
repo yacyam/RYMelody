@@ -35,7 +35,7 @@ async function sendMail(email: string, token: string): Promise<void> {
       Please Verify Your Email Address Here By Clicking The "Verify Email" Link.
       <br />
       <br />
-      <a href="http://localhost:3000/auth/verify/${token}"
+      <a href="https://rymelody-backend.onrender.com/auth/verify/${token}"
         style="text-decoration: none; color: white; background-color: #928aff; padding: 10px;">
         Verify Email
       </a>
