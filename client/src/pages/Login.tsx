@@ -38,7 +38,7 @@ export default function Login() {
       setErrors([{ message: 'Username Or Password Incorrect, Please Try Again' }])
     }
     else {
-      window.open('http://localhost:5173/', '_self')
+      window.open('https://rymelody.netlify.app/', '_self')
     }
   }
 

@@ -99,7 +99,7 @@ export default function Post() {
     })
 
     if (res.ok) {
-      window.open('http://localhost:5173/', '_self')
+      window.open('https://rymelody.netlify.app/', '_self')
     }
     else {
       const errors = await res.json()
@@ -123,7 +123,7 @@ export default function Post() {
   }
 
   function gotoUserProfile(e: React.SyntheticEvent, userid: number) {
-    window.open(`http://localhost:5173/user/${userid}`, '_self')
+    window.open(`https://rymelody.netlify.app/user/${userid}`, '_self')
     e.stopPropagation();
   }
 

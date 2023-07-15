@@ -17,7 +17,7 @@ export default function Navbar() {
     })
 
     if (res.ok) {
-      window.open('http://localhost:5173/login', '_self')
+      window.open('https://rymelody.netlify.app/login', '_self')
     }
   }
 

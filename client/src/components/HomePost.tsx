@@ -4,21 +4,21 @@ import "../styles/components/HomePost.css"
 export default function HomePost(props: HighlightPost) {
 
   function gotoPost() {
-    window.open(`http://localhost:5173/post/${props.id}`, '_self')
+    window.open(`https://rymelody.netlify.app/post/${props.id}`, '_self')
   }
 
   function gotoPostNewWindow(e: React.SyntheticEvent) {
-    window.open(`http://localhost:5173/post/${props.id}`)
+    window.open(`https://rymelody.netlify.app/post/${props.id}`)
     e.preventDefault()
   }
 
   function gotoUserProfile(e: React.SyntheticEvent) {
-    window.open(`http://localhost:5173/user/${props.userid}`, '_self')
+    window.open(`https://rymelody.netlify.app/user/${props.userid}`, '_self')
     e.stopPropagation()
   }
 
   function gotoUserProfileNewWindow(e: React.SyntheticEvent) {
-    window.open(`http://localhost:5173/user/${props.userid}`)
+    window.open(`https://rymelody.netlify.app/user/${props.userid}`)
     e.stopPropagation()
     e.preventDefault()
   }

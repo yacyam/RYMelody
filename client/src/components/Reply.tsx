@@ -72,7 +72,7 @@ export default function Reply(props: PropTypes) {
 
   function gotoUserProfile(e: React.SyntheticEvent) {
     e.preventDefault()
-    window.open(`http://localhost:5173/user/${props.userid}`, '_self')
+    window.open(`https://rymelody.netlify.app/user/${props.userid}`, '_self')
   }
 
   function showOriginal() {

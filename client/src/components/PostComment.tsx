@@ -23,7 +23,7 @@ export default function PostComment(props: CommentSetter) {
   const [replyErrors, setReplyErrors] = useState<MsgErr>([])
 
   function gotoUserProfile(e: React.SyntheticEvent) {
-    window.open(`http://localhost:5173/user/${props.userid}`, '_self')
+    window.open(`https://rymelody.netlify.app/user/${props.userid}`, '_self')
     e.stopPropagation();
   }
 
