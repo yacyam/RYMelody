@@ -27,7 +27,7 @@ export default function Reply(props: PropTypes) {
       isMainCommentReply: false
     }
 
-    const res = await fetch(`http://localhost:3000/post/${props.postid}/reply`, {
+    const res = await fetch(`https://rymelody-backend.onrender.com/post/${props.postid}/reply`, {
       method: 'POST',
       'credentials': 'include',
       body: JSON.stringify(replyData),
@@ -102,7 +102,7 @@ export default function Reply(props: PropTypes) {
       commentId: props.commentid
     }
 
-    const res = await fetch(`http://localhost:3000/post/${props.postid}/reply`, {
+    const res = await fetch(`https://rymelody-backend.onrender.com/post/${props.postid}/reply`, {
       method: 'PUT',
       'credentials': 'include',
       body: JSON.stringify(editData),
@@ -145,7 +145,7 @@ export default function Reply(props: PropTypes) {
       commentId: props.commentid
     }
 
-    const res = await fetch(`http://localhost:3000/post/${props.postid}/reply`, {
+    const res = await fetch(`https://rymelody-backend.onrender.com/post/${props.postid}/reply`, {
       method: 'DELETE',
       'credentials': 'include',
       body: JSON.stringify(deleteData),
@@ -204,8 +204,13 @@ export default function Reply(props: PropTypes) {
         }
         <p onClick={setReplying}>{isReplying ? "Cancel" : "Reply"}</p>
       </div>
+
       <Errors
         errors={editErrors}
+      />
+
+      <Errors
+        errors={deleteErrors}
       />
 
       {isReplying && <CreateReply updateReply={submitReply} />}

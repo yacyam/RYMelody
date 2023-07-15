@@ -27,7 +27,7 @@ export default function Login() {
   async function submitForm(e: React.SyntheticEvent) {
     e.preventDefault()
 
-    const res = await fetch('http://localhost:3000/auth/login', {
+    const res = await fetch('https://rymelody-backend.onrender.com/auth/login', {
       method: 'POST',
       credentials: 'include',
       body: JSON.stringify(formData),

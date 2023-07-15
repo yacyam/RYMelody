@@ -1,4 +1,3 @@
-const PORT = 3000
 import express from 'express'
 import session from 'express-session'
 import passport from 'passport'
@@ -6,14 +5,19 @@ import cors from 'cors'
 import { pool } from './database/index'
 require('dotenv').config()
 
+const PORT = process.env.PORT || 3000
+
 const pgSession = require('connect-pg-simple')(session)
 
 const app = express()
+
 
 app.use(cors({
   origin: 'http://localhost:5173',
   credentials: true
 }))
+
+app.set("trust proxy", 1)
 
 require('./strategy/local')
 
@@ -28,7 +32,9 @@ app.use(session({
     pool: pool
   }),
   cookie: {
-    secure: false
+    sameSite: "none",
+    secure: true,
+    maxAge: 1000 * 60 * 60 * 24 * 7
   }
 }))
 

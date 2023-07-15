@@ -14,7 +14,7 @@ export default function Profile() {
   const [doesNotExist, setDoesNotExist] = useState<boolean>(false)
 
   useEffect(() => {
-    fetch(`http://localhost:3000/user/${id}`, {
+    fetch(`https://rymelody-backend.onrender.com/user/${id}`, {
       'credentials': 'include'
     })
       .then(res => {
@@ -27,7 +27,7 @@ export default function Profile() {
   }, [])
 
   async function updateContact(data: { text: string }): Promise<MsgErr> {
-    const res = await fetch(`http://localhost:3000/user/${id}/updateContact`, {
+    const res = await fetch(`https://rymelody-backend.onrender.com/user/${id}/updateContact`, {
       method: 'PUT',
       'credentials': 'include',
       body: JSON.stringify(data),
@@ -54,7 +54,7 @@ export default function Profile() {
   }
 
   async function updateBio(data: { text: string }): Promise<MsgErr> {
-    const res = await fetch(`http://localhost:3000/user/${id}/updateBio`, {
+    const res = await fetch(`https://rymelody-backend.onrender.com/user/${id}/updateBio`, {
       method: 'PUT',
       'credentials': 'include',
       body: JSON.stringify(data),

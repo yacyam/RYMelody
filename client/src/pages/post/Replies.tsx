@@ -13,7 +13,7 @@ interface PropTypes {
 export default function Replies(props: PropTypes) {
 
   useEffect(() => {
-    fetch(`http://localhost:3000/post/${props.postId}/comment/${props.commentId}/replies`, {
+    fetch(`https://rymelody-backend.onrender.com/post/${props.postId}/comment/${props.commentId}/replies`, {
       method: 'GET',
       'credentials': 'include',
     })

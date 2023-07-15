@@ -7,7 +7,7 @@ export default function Navbar() {
   const { isLoggedIn, userData } = useContext(AuthContext)
 
   async function logout() {
-    const res = await fetch('http://localhost:3000/auth/logout', {
+    const res = await fetch('https://rymelody-backend.onrender.com/auth/logout', {
       method: 'POST',
       'credentials': 'include',
       headers: new Headers({

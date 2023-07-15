@@ -21,7 +21,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [userData, setUserData] = useState()
 
   useEffect(() => {
-    fetch('http://localhost:3000/auth/authenticate', {
+    fetch('https://rymelody-backend.onrender.com/auth/authenticate', {
       method: 'GET',
       'credentials': 'include'
     })

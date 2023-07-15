@@ -14,7 +14,7 @@ export default function Comments(props: { postId: string }) {
   const { isLoggedIn } = useContext(AuthContext)
 
   useEffect(() => {
-    fetch(`http://localhost:3000/post/${props.postId}/comments`, {
+    fetch(`https://rymelody-backend.onrender.com/post/${props.postId}/comments`, {
       method: 'GET',
       'credentials': 'include'
     })
@@ -33,7 +33,7 @@ export default function Comments(props: { postId: string }) {
   async function submitComment(e: React.SyntheticEvent): Promise<void> {
     e.preventDefault()
 
-    const res = await fetch(`http://localhost:3000/post/${props.postId}/comment`, {
+    const res = await fetch(`https://rymelody-backend.onrender.com/post/${props.postId}/comment`, {
       method: 'POST',
       'credentials': 'include',
       body: JSON.stringify(formData),

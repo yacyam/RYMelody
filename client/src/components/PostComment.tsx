@@ -48,7 +48,7 @@ export default function PostComment(props: CommentSetter) {
       comment: data.text
     }
 
-    const res = await fetch(`http://localhost:3000/post/${props.postId}/comment`, {
+    const res = await fetch(`https://rymelody-backend.onrender.com/post/${props.postId}/comment`, {
       method: 'PUT',
       'credentials': 'include',
       body: JSON.stringify(newCommentData),
@@ -91,7 +91,7 @@ export default function PostComment(props: CommentSetter) {
       id: props.id
     }
 
-    const res = await fetch(`http://localhost:3000/post/${props.postId}/comment`, {
+    const res = await fetch(`https://rymelody-backend.onrender.com/post/${props.postId}/comment`, {
       method: 'DELETE',
       'credentials': 'include',
       body: JSON.stringify(commentData),
@@ -125,7 +125,7 @@ export default function PostComment(props: CommentSetter) {
       isMainCommentReply: true
     }
 
-    const res = await fetch(`http://localhost:3000/post/${postId}/reply`, {
+    const res = await fetch(`https://rymelody-backend.onrender.com/post/${postId}/reply`, {
       method: 'POST',
       'credentials': 'include',
       body: JSON.stringify(replyData),

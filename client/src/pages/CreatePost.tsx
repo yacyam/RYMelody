@@ -92,7 +92,7 @@ export default function CreatePost() {
       tags: generatedTags
     }
 
-    const res = await fetch('http://localhost:3000/post/create', {
+    const res = await fetch('https://rymelody-backend.onrender.com/post/create', {
       method: 'POST',
       'credentials': 'include',
       body: JSON.stringify(finalFormData),

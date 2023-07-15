@@ -28,7 +28,7 @@ export default function Register() {
   async function submitForm(e: React.SyntheticEvent): Promise<void> {
     e.preventDefault()
 
-    const res = await fetch('http://localhost:3000/auth/register', {
+    const res = await fetch('https://rymelody-backend.onrender.com/auth/register', {
       method: 'POST',
       body: JSON.stringify(formData),
       headers: { 'Content-Type': 'application/json' }

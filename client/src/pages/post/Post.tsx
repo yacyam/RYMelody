@@ -17,7 +17,7 @@ export default function Post() {
   const [confirmDelete, setConfirmDelete] = useState(false)
 
   useEffect(() => {
-    fetch(`http://localhost:3000/post/${id}`, {
+    fetch(`https://rymelody-backend.onrender.com/post/${id}`, {
       method: 'GET',
       'credentials': 'include'
     })
@@ -34,7 +34,7 @@ export default function Post() {
   async function likeOrUnlikePost(): Promise<void> {
     if (!postData) return
 
-    const res = await fetch(`http://localhost:3000/post/${id}/like`, {
+    const res = await fetch(`https://rymelody-backend.onrender.com/post/${id}/like`, {
       method: 'POST',
       'credentials': 'include',
     })
@@ -56,7 +56,7 @@ export default function Post() {
   }
 
   async function updateDescription(data: { text: string }): Promise<void> {
-    const res = await fetch(`http://localhost:3000/post/${id}/update`, {
+    const res = await fetch(`https://rymelody-backend.onrender.com/post/${id}/update`, {
       method: 'PUT',
       'credentials': 'include',
       body: JSON.stringify(data),
@@ -93,7 +93,7 @@ export default function Post() {
       return
     }
 
-    const res = await fetch(`http://localhost:3000/post/${id}`, {
+    const res = await fetch(`https://rymelody-backend.onrender.com/post/${id}`, {
       method: 'DELETE',
       'credentials': 'include'
     })

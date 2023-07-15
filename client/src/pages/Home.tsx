@@ -25,7 +25,7 @@ export default function Home() {
 
     const fullTags = allTags.tags.reduce((prev, curr) => {
       return prev + "&" + "tags=" + curr
-    }, "&")
+    }, "")
 
     const fullQuery = numPost + "&" + searchQ + "&" + newestQ + "&" + oldestQ + "&" + likesQ + fullTags
 
@@ -35,7 +35,7 @@ export default function Home() {
   const queryString = queryStringCreate()
 
   useEffect(() => {
-    fetch(`http://localhost:3000/post/all${queryString}`, {
+    fetch(`https://rymelody-backend.onrender.com/post/all${queryString}`, {
       method: 'GET'
     })
       .then(res => {

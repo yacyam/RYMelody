@@ -77,6 +77,7 @@ router.get('/:id', async (req, res) => {
       isVerified: user.verified
     })
   } catch (err) {
+    console.log(err)
     res.status(500).send(INTERNAL_ERR_MSG)
   }
 })

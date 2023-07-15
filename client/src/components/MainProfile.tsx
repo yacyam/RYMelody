@@ -49,7 +49,7 @@ export default function MainProfile(props: PropTypes) {
 
   async function resendVerification(): Promise<void> {
 
-    const res = await fetch(`http://localhost:3000/user/${props.id}/resendVerification`, {
+    const res = await fetch(`https://rymelody-backend.onrender.com/user/${props.id}/resendVerification`, {
       method: 'GET',
       'credentials': 'include'
     })
