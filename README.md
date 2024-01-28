@@ -10,4 +10,4 @@ in which other users can comment and give feedback on various aspects of the mus
 Review Your Melody supports filtering for various posts, adding tags to posts, 
 along with customizing user profiles.
 
-Link: rymelody.netlify.app
+Link: <a href="https://rymelody.netlify.app">rymelody.netlify.app</a>
